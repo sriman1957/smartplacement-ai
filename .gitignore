@@ -1,0 +1,14 @@
+# IDE
+.idea/
+*.iml
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+application-local.properties
