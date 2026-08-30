@@ -29,7 +29,7 @@ public class User {
     @Column(nullable = false)
     private String role;
 
-    @Column(nullable = false, updatable = true)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     protected User() {

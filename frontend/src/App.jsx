@@ -1,66 +1,138 @@
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  LogOut,
+  Mail,
+  UserRound,
+} from "lucide-react";
 import api from "./services/api";
 import "./App.css";
 
-const initialFormData = {
+const initialRegisterFormData = {
   name: "",
   email: "",
   password: "",
   confirmPassword: "",
 };
 
+const initialLoginFormData = {
+  email: "",
+  password: "",
+};
+
 function App() {
-  const [formData, setFormData] = useState(initialFormData);
+  const [isLoginMode, setIsLoginMode] = useState(true);
+
+  const [isAuthenticated, setIsAuthenticated] = useState(
+      () => Boolean(localStorage.getItem("token"))
+  );
+
+  const [registerFormData, setRegisterFormData] = useState(
+      initialRegisterFormData
+  );
+
+  const [loginFormData, setLoginFormData] = useState(
+      initialLoginFormData
+  );
+
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  function handleChange(event) {
+  const [loggedInUser, setLoggedInUser] = useState(() => ({
+    name: localStorage.getItem("userName") || "",
+    email: localStorage.getItem("userEmail") || "",
+    role: localStorage.getItem("userRole") || "",
+  }));
+
+  const [showRegisterPassword, setShowRegisterPassword] =
+      useState(false);
+
+  const [showConfirmPassword, setShowConfirmPassword] =
+      useState(false);
+
+  const [showLoginPassword, setShowLoginPassword] =
+      useState(false);
+
+  function clearMessages() {
+    setErrorMessage("");
+    setSuccessMessage("");
+  }
+
+  function handleRegisterChange(event) {
     const { name, value } = event.target;
 
-    setFormData((currentFormData) => ({
+    setRegisterFormData((currentFormData) => ({
       ...currentFormData,
       [name]: value,
     }));
   }
 
-  function validateForm() {
+  function handleLoginChange(event) {
+    const { name, value } = event.target;
+
+    setLoginFormData((currentFormData) => ({
+      ...currentFormData,
+      [name]: value,
+    }));
+  }
+
+  function validateRegisterForm() {
     if (
-      !formData.name.trim() ||
-      !formData.email.trim() ||
-      !formData.password ||
-      !formData.confirmPassword
+        !registerFormData.name.trim() ||
+        !registerFormData.email.trim() ||
+        !registerFormData.password ||
+        !registerFormData.confirmPassword
     ) {
       return "All fields are required";
     }
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailPattern.test(formData.email)) {
+    if (!emailPattern.test(registerFormData.email)) {
       return "Enter a valid email address";
     }
 
-    if (formData.password.length < 6) {
+    if (registerFormData.password.length < 6) {
       return "Password must be at least 6 characters long";
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (
+        registerFormData.password !==
+        registerFormData.confirmPassword
+    ) {
       return "Password and Confirm Password must match";
     }
 
     return "";
   }
 
-  async function handleSubmit(event) {
+  function validateLoginForm() {
+    if (
+        !loginFormData.email.trim() ||
+        !loginFormData.password
+    ) {
+      return "All fields are required";
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(loginFormData.email)) {
+      return "Enter a valid email address";
+    }
+
+    return "";
+  }
+
+  async function handleRegisterSubmit(event) {
     event.preventDefault();
 
-    setErrorMessage("");
-    setSuccessMessage("");
+    clearMessages();
 
-    const validationError = validateForm();
+    const validationError = validateRegisterForm();
 
     if (validationError) {
       setErrorMessage(validationError);
@@ -70,18 +142,26 @@ function App() {
     setIsSubmitting(true);
 
     try {
-      const response = await api.post("/auth/register", {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        password: formData.password,
+      await api.post("/auth/register", {
+        name: registerFormData.name.trim(),
+        email: registerFormData.email.trim(),
+        password: registerFormData.password,
       });
 
-      setSuccessMessage(response.data.message);
-      setFormData(initialFormData);
+      setSuccessMessage(
+          "Account created successfully. You may now sign in."
+      );
+
+      setRegisterFormData(initialRegisterFormData);
+
+      setTimeout(() => {
+        setIsLoginMode(true);
+        setSuccessMessage("");
+      }, 1200);
     } catch (error) {
       const backendMessage =
-        error.response?.data?.message ||
-        "Registration failed. Please try again.";
+          error.response?.data?.message ||
+          "Registration failed. Please try again.";
 
       setErrorMessage(backendMessage);
     } finally {
@@ -89,132 +169,618 @@ function App() {
     }
   }
 
+  async function handleLoginSubmit(event) {
+    event.preventDefault();
+
+    clearMessages();
+
+    const validationError = validateLoginForm();
+
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await api.post("/auth/login", {
+        email: loginFormData.email.trim(),
+        password: loginFormData.password,
+      });
+
+      localStorage.setItem("token", response.data.token);
+
+      localStorage.setItem(
+          "userName",
+          response.data.name || ""
+      );
+
+      localStorage.setItem(
+          "userEmail",
+          response.data.email || ""
+      );
+
+      localStorage.setItem(
+          "userRole",
+          response.data.role || ""
+      );
+
+      setLoggedInUser({
+        name: response.data.name || "",
+        email: response.data.email || "",
+        role: response.data.role || "",
+      });
+
+      setLoginFormData(initialLoginFormData);
+      setSuccessMessage("");
+
+      setIsAuthenticated(true);
+    } catch (error) {
+      const backendMessage =
+          error.response?.data?.message ||
+          "Login failed. Please try again.";
+
+      setErrorMessage(backendMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("userRole");
+
+    setLoggedInUser({
+      name: "",
+      email: "",
+      role: "",
+    });
+
+    setIsAuthenticated(false);
+    setIsLoginMode(true);
+    setLoginFormData(initialLoginFormData);
+
+    clearMessages();
+  }
+
+  function showLoginPage() {
+    clearMessages();
+    setIsLoginMode(true);
+  }
+
+  function showRegisterPage() {
+    clearMessages();
+    setIsLoginMode(false);
+  }
+
+  if (isAuthenticated) {
+    return (
+        <main className="auth-page">
+          <section className="auth-shell">
+            <aside className="auth-brand-panel">
+              <div className="brand-mark">
+                <div className="brand-mark-icon">
+                  <ArrowRight size={20} strokeWidth={2.5} />
+                </div>
+
+                <span>SMARTPLACEMENT AI</span>
+              </div>
+
+              <div className="brand-content">
+                <p className="brand-label">
+                  AUTHENTICATED SESSION
+                </p>
+
+                <h2>
+                  Welcome back
+                  <span> {loggedInUser.name}</span>
+                </h2>
+
+                <p className="brand-description">
+                  Your SmartPlacement account is authenticated
+                  successfully.
+                </p>
+              </div>
+
+              <div className="brand-footer">
+                <div className="status-dot" />
+
+                <span>JWT authentication active</span>
+              </div>
+            </aside>
+
+            <section className="auth-form-panel">
+              <div className="auth-form-container">
+                <div className="auth-header">
+                  <p className="auth-eyebrow">
+                    AUTHENTICATED
+                  </p>
+
+                  <h1>You're signed in</h1>
+
+                  <p>
+                    Your JWT is stored and ready for protected
+                    API requests.
+                  </p>
+                </div>
+
+                <div className="auth-form">
+                  <div className="form-group">
+                    <label>Name</label>
+
+                    <div className="input-wrapper">
+                      <UserRound
+                          className="input-icon"
+                          size={19}
+                      />
+
+                      <input
+                          type="text"
+                          value={loggedInUser.name}
+                          readOnly
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Email address</label>
+
+                    <div className="input-wrapper">
+                      <Mail
+                          className="input-icon"
+                          size={19}
+                      />
+
+                      <input
+                          type="email"
+                          value={loggedInUser.email}
+                          readOnly
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Role</label>
+
+                    <div className="input-wrapper">
+                      <UserRound
+                          className="input-icon"
+                          size={19}
+                      />
+
+                      <input
+                          type="text"
+                          value={loggedInUser.role}
+                          readOnly
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                      className="primary-button"
+                      type="button"
+                      onClick={handleLogout}
+                  >
+                    <span>Logout</span>
+                    <LogOut size={19} />
+                  </button>
+                </div>
+              </div>
+            </section>
+          </section>
+        </main>
+    );
+  }
+
   return (
-    <main className="registration-page">
-      <section className="registration-card">
-        <div className="registration-header">
-          <p className="eyebrow">SMARTPLACEMENT AI</p>
-          <h1>Create your account</h1>
-          <p>Register to start building your placement profile.</p>
-        </div>
+      <main className="auth-page">
+        <section className="auth-shell">
+          <aside className="auth-brand-panel">
+            <div className="brand-mark">
+              <div className="brand-mark-icon">
+                <ArrowRight size={20} strokeWidth={2.5} />
+              </div>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="form-group">
-            <label htmlFor="name">Name</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter your full name"
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email address"
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-
-            <div className="password-input-wrapper">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Minimum 6 characters"
-                disabled={isSubmitting}
-              />
-
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() =>
-                  setShowPassword((currentValue) => !currentValue)
-                }
-                disabled={isSubmitting}
-                aria-label={
-                  showPassword ? "Hide password" : "Show password"
-                }
-              >
-                {showPassword ? (
-                  <EyeOff size={20} />
-                ) : (
-                  <Eye size={20} />
-                )}
-              </button>
+              <span>SMARTPLACEMENT AI</span>
             </div>
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
+            <div className="brand-content">
+              <p className="brand-label">
+                PLACEMENT PLATFORM
+              </p>
 
-            <div className="password-input-wrapper">
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Re-enter your password"
-                disabled={isSubmitting}
-              />
+              <h2>
+                Build your career
+                <span> with confidence.</span>
+              </h2>
 
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() =>
-                  setShowConfirmPassword(
-                    (currentValue) => !currentValue
-                  )
-                }
-                disabled={isSubmitting}
-                aria-label={
-                  showConfirmPassword
-                    ? "Hide confirm password"
-                    : "Show confirm password"
-                }
-              >
-                {showConfirmPassword ? (
-                  <EyeOff size={20} />
-                ) : (
-                  <Eye size={20} />
-                )}
-              </button>
+              <p className="brand-description">
+                Manage your placement journey, strengthen your
+                profile, and prepare for better opportunities.
+              </p>
             </div>
-          </div>
 
-          {errorMessage && (
-            <p className="message error-message" role="alert">
-              {errorMessage}
-            </p>
-          )}
+            <div className="brand-footer">
+              <div className="status-dot" />
 
-          {successMessage && (
-            <p className="message success-message">
-              {successMessage}
-            </p>
-          )}
+              <span>Secure student authentication</span>
+            </div>
+          </aside>
 
-          <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating account..." : "Register"}
-          </button>
-        </form>
-      </section>
-    </main>
+          <section className="auth-form-panel">
+            <div className="auth-form-container">
+              {isLoginMode ? (
+                  <>
+                    <div className="auth-header">
+                      <p className="auth-eyebrow">
+                        WELCOME BACK
+                      </p>
+
+                      <h1>Sign in to your account</h1>
+
+                      <p>
+                        Enter your credentials to continue to your
+                        SmartPlacement dashboard.
+                      </p>
+                    </div>
+
+                    <form
+                        className="auth-form"
+                        onSubmit={handleLoginSubmit}
+                        noValidate
+                    >
+                      <div className="form-group">
+                        <label htmlFor="login-email">
+                          Email address
+                        </label>
+
+                        <div className="input-wrapper">
+                          <Mail
+                              className="input-icon"
+                              size={19}
+                          />
+
+                          <input
+                              id="login-email"
+                              name="email"
+                              type="email"
+                              value={loginFormData.email}
+                              onChange={handleLoginChange}
+                              placeholder="you@example.com"
+                              disabled={isSubmitting}
+                              autoComplete="email"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="login-password">
+                          Password
+                        </label>
+
+                        <div className="input-wrapper">
+                          <LockKeyhole
+                              className="input-icon"
+                              size={19}
+                          />
+
+                          <input
+                              id="login-password"
+                              name="password"
+                              type={
+                                showLoginPassword
+                                    ? "text"
+                                    : "password"
+                              }
+                              value={loginFormData.password}
+                              onChange={handleLoginChange}
+                              placeholder="Enter your password"
+                              disabled={isSubmitting}
+                              autoComplete="current-password"
+                          />
+
+                          <button
+                              type="button"
+                              className="password-toggle"
+                              onClick={() =>
+                                  setShowLoginPassword(
+                                      (currentValue) => !currentValue
+                                  )
+                              }
+                              disabled={isSubmitting}
+                              aria-label={
+                                showLoginPassword
+                                    ? "Hide password"
+                                    : "Show password"
+                              }
+                          >
+                            {showLoginPassword ? (
+                                <EyeOff size={19} />
+                            ) : (
+                                <Eye size={19} />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {errorMessage && (
+                          <div
+                              className="message error-message"
+                              role="alert"
+                          >
+                            {errorMessage}
+                          </div>
+                      )}
+
+                      {successMessage && (
+                          <div
+                              className="message success-message"
+                              role="status"
+                          >
+                            {successMessage}
+                          </div>
+                      )}
+
+                      <button
+                          className="primary-button"
+                          type="submit"
+                          disabled={isSubmitting}
+                      >
+                    <span>
+                      {isSubmitting
+                          ? "Signing in..."
+                          : "Sign in"}
+                    </span>
+
+                        {!isSubmitting && (
+                            <ArrowRight size={19} />
+                        )}
+                      </button>
+                    </form>
+
+                    <div className="auth-switch">
+                  <span>
+                    Don't have an account?
+                  </span>
+
+                      <button
+                          type="button"
+                          onClick={showRegisterPage}
+                          disabled={isSubmitting}
+                      >
+                        Create account
+                        <ArrowRight size={16} />
+                      </button>
+                    </div>
+                  </>
+              ) : (
+                  <>
+                    <div className="auth-header">
+                      <p className="auth-eyebrow">
+                        GET STARTED
+                      </p>
+
+                      <h1>Create your account</h1>
+
+                      <p>
+                        Create your SmartPlacement account and start
+                        building your placement profile.
+                      </p>
+                    </div>
+
+                    <form
+                        className="auth-form"
+                        onSubmit={handleRegisterSubmit}
+                        noValidate
+                    >
+                      <div className="form-group">
+                        <label htmlFor="register-name">
+                          Full name
+                        </label>
+
+                        <div className="input-wrapper">
+                          <UserRound
+                              className="input-icon"
+                              size={19}
+                          />
+
+                          <input
+                              id="register-name"
+                              name="name"
+                              type="text"
+                              value={registerFormData.name}
+                              onChange={handleRegisterChange}
+                              placeholder="Enter your full name"
+                              disabled={isSubmitting}
+                              autoComplete="name"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="register-email">
+                          Email address
+                        </label>
+
+                        <div className="input-wrapper">
+                          <Mail
+                              className="input-icon"
+                              size={19}
+                          />
+
+                          <input
+                              id="register-email"
+                              name="email"
+                              type="email"
+                              value={registerFormData.email}
+                              onChange={handleRegisterChange}
+                              placeholder="you@example.com"
+                              disabled={isSubmitting}
+                              autoComplete="email"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="register-password">
+                          Password
+                        </label>
+
+                        <div className="input-wrapper">
+                          <LockKeyhole
+                              className="input-icon"
+                              size={19}
+                          />
+
+                          <input
+                              id="register-password"
+                              name="password"
+                              type={
+                                showRegisterPassword
+                                    ? "text"
+                                    : "password"
+                              }
+                              value={registerFormData.password}
+                              onChange={handleRegisterChange}
+                              placeholder="Minimum 6 characters"
+                              disabled={isSubmitting}
+                              autoComplete="new-password"
+                          />
+
+                          <button
+                              type="button"
+                              className="password-toggle"
+                              onClick={() =>
+                                  setShowRegisterPassword(
+                                      (currentValue) => !currentValue
+                                  )
+                              }
+                              disabled={isSubmitting}
+                              aria-label={
+                                showRegisterPassword
+                                    ? "Hide password"
+                                    : "Show password"
+                              }
+                          >
+                            {showRegisterPassword ? (
+                                <EyeOff size={19} />
+                            ) : (
+                                <Eye size={19} />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="confirmPassword">
+                          Confirm password
+                        </label>
+
+                        <div className="input-wrapper">
+                          <LockKeyhole
+                              className="input-icon"
+                              size={19}
+                          />
+
+                          <input
+                              id="confirmPassword"
+                              name="confirmPassword"
+                              type={
+                                showConfirmPassword
+                                    ? "text"
+                                    : "password"
+                              }
+                              value={
+                                registerFormData.confirmPassword
+                              }
+                              onChange={handleRegisterChange}
+                              placeholder="Re-enter your password"
+                              disabled={isSubmitting}
+                              autoComplete="new-password"
+                          />
+
+                          <button
+                              type="button"
+                              className="password-toggle"
+                              onClick={() =>
+                                  setShowConfirmPassword(
+                                      (currentValue) => !currentValue
+                                  )
+                              }
+                              disabled={isSubmitting}
+                              aria-label={
+                                showConfirmPassword
+                                    ? "Hide password"
+                                    : "Show password"
+                              }
+                          >
+                            {showConfirmPassword ? (
+                                <EyeOff size={19} />
+                            ) : (
+                                <Eye size={19} />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {errorMessage && (
+                          <div
+                              className="message error-message"
+                              role="alert"
+                          >
+                            {errorMessage}
+                          </div>
+                      )}
+
+                      {successMessage && (
+                          <div
+                              className="message success-message"
+                              role="status"
+                          >
+                            {successMessage}
+                          </div>
+                      )}
+
+                      <button
+                          className="primary-button"
+                          type="submit"
+                          disabled={isSubmitting}
+                      >
+                    <span>
+                      {isSubmitting
+                          ? "Creating account..."
+                          : "Create account"}
+                    </span>
+
+                        {!isSubmitting && (
+                            <ArrowRight size={19} />
+                        )}
+                      </button>
+                    </form>
+
+                    <div className="auth-switch">
+                  <span>
+                    Already have an account?
+                  </span>
+
+                      <button
+                          type="button"
+                          onClick={showLoginPage}
+                          disabled={isSubmitting}
+                      >
+                        Sign in
+                        <ArrowRight size={16} />
+                      </button>
+                    </div>
+                  </>
+              )}
+            </div>
+          </section>
+        </section>
+      </main>
   );
 }
 

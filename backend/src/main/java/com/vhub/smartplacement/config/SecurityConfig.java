@@ -2,11 +2,19 @@ package com.vhub.smartplacement.config;
 
 import java.util.List;
 
+import com.vhub.smartplacement.security.JwtAuthenticationFilter;
+import com.vhub.smartplacement.service.CustomUserDetailsService;
+import com.vhub.smartplacement.service.JwtService;
+
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -16,17 +24,44 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http
+            HttpSecurity http,
+            JwtService jwtService,
+            CustomUserDetailsService userDetailsService
     ) throws Exception {
+
+        JwtAuthenticationFilter jwtAuthenticationFilter =
+                new JwtAuthenticationFilter(
+                        jwtService,
+                        userDetailsService
+                );
+
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/health",
                                 "/api/auth/**"
                         ).permitAll()
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception ->
+                        exception.authenticationEntryPoint(
+                                (request, response, exceptionObject) ->
+                                        response.sendError(
+                                                HttpServletResponse.SC_UNAUTHORIZED,
+                                                "Unauthorized"
+                                        )
+                        )
+                )
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
                 );
 
         return http.build();
@@ -41,7 +76,13 @@ public class SecurityConfig {
         );
 
         configuration.setAllowedMethods(
-                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE",
+                        "OPTIONS"
+                )
         );
 
         configuration.setAllowedHeaders(
