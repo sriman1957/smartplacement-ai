@@ -1,6 +1,7 @@
 package com.vhub.smartplacement.dto;
 
 public class ProfileResponse {
+
     private String name;
     private String email;
     private String role;
@@ -15,15 +16,9 @@ public class ProfileResponse {
         this.role = role;
     }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getEmail() { return email; }
 
-    public String getRole() {
-        return role;
-    }
+    public String getRole() { return role; }
 }

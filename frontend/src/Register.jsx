@@ -38,9 +38,59 @@ function Register({
                 onSubmit={onSubmit}
                 noValidate
             >
+                <div className="form-row">
+                    <div className="form-group">
+                        <label htmlFor="register-first-name">
+                            First name
+                        </label>
+
+                        <div className="input-wrapper">
+                            <UserRound
+                                className="input-icon"
+                                size={19}
+                            />
+
+                            <input
+                                id="register-first-name"
+                                name="firstName"
+                                type="text"
+                                value={formData.firstName}
+                                onChange={onChange}
+                                placeholder="Srii"
+                                disabled={isSubmitting}
+                                autoComplete="given-name"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="register-last-name">
+                            Last name
+                        </label>
+
+                        <div className="input-wrapper">
+                            <UserRound
+                                className="input-icon"
+                                size={19}
+                            />
+
+                            <input
+                                id="register-last-name"
+                                name="lastName"
+                                type="text"
+                                value={formData.lastName}
+                                onChange={onChange}
+                                placeholder="Test"
+                                disabled={isSubmitting}
+                                autoComplete="family-name"
+                            />
+                        </div>
+                    </div>
+                </div>
+
                 <div className="form-group">
-                    <label htmlFor="register-name">
-                        Full name
+                    <label htmlFor="register-username">
+                        Username
                     </label>
 
                     <div className="input-wrapper">
@@ -50,16 +100,23 @@ function Register({
                         />
 
                         <input
-                            id="register-name"
-                            name="name"
+                            id="register-username"
+                            name="username"
                             type="text"
-                            value={formData.name}
+                            value={formData.username}
                             onChange={onChange}
-                            placeholder="Enter your full name"
+                            placeholder="srii_test"
                             disabled={isSubmitting}
-                            autoComplete="name"
+                            autoComplete="username"
+                            maxLength={30}
+                            spellCheck={false}
                         />
                     </div>
+
+                    <span className="field-help">
+                        3 to 30 characters. Use letters, numbers,
+                        and underscores.
+                    </span>
                 </div>
 
                 <div className="form-group">
@@ -201,11 +258,11 @@ function Register({
                     type="submit"
                     disabled={isSubmitting}
                 >
-          <span>
-            {isSubmitting
-                ? "Creating account..."
-                : "Create account"}
-          </span>
+                    <span>
+                        {isSubmitting
+                            ? "Creating account..."
+                            : "Create account"}
+                    </span>
 
                     {!isSubmitting && (
                         <ArrowRight size={19} />

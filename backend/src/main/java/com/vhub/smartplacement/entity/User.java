@@ -18,6 +18,20 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    @Column(nullable = false, unique = true)
+    private String username;
+
+    /*
+     * Kept for compatibility with the existing profile module.
+     * This stores firstName + lastName.
+     */
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false, unique = true)
@@ -40,15 +54,41 @@ public class User {
         createdAt = LocalDateTime.now();
     }
 
-    public User(String name, String email, String password, String role) {
-        this.name = name;
+    public User(
+            String firstName,
+            String lastName,
+            String username,
+            String email,
+            String password,
+            String role
+    ) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.name = buildFullName(firstName, lastName);
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
+    private String buildFullName(String firstName, String lastName) {
+        return firstName.trim() + " " + lastName.trim();
+    }
+
     public Long getId() {
         return id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     public String getName() {
