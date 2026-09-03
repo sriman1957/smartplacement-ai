@@ -95,6 +95,29 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
+    @ExceptionHandler(ResumeNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleResumeNotFoundException(
+            ResumeNotFoundException exception
+    ) {
+        Map<String, String> error = Map.of( "message", exception.getMessage() );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(ResumeValidationException.class)
+    public ResponseEntity<Map<String, String>> handleResumeValidationException(
+            ResumeValidationException exception
+    ) {
+        Map<String, String> error = Map.of(
+                "message",
+                exception.getMessage()
+        );
+
+        return ResponseEntity
+                .badRequest()
+                .body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGenericException(
             Exception exception

@@ -1,0 +1,659 @@
+.resume-manager {
+    width: 100%;
+    padding: 22px;
+
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+
+    box-shadow:
+            0 1px 2px rgba(15, 23, 42, 0.025);
+}
+
+.resume-manager-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+
+    margin-bottom: 20px;
+}
+
+.resume-manager-label {
+    margin: 0 0 6px;
+
+    color: var(--color-primary);
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.resume-manager-header h2 {
+    margin: 0;
+
+    color: var(--color-text);
+
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+}
+
+.resume-manager-description {
+    margin: 6px 0 0;
+
+    color: var(--color-text-secondary);
+
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.resume-manager-header-icon {
+    width: 40px;
+    height: 40px;
+
+    flex-shrink: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+
+    background: var(--color-background);
+    color: var(--color-primary);
+}
+
+.resume-manager-loading {
+    min-height: 110px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    border: 1px dashed var(--color-border);
+    border-radius: 10px;
+
+    background: var(--color-background);
+
+    color: var(--color-text-secondary);
+
+    font-size: 11px;
+}
+
+.resume-manager-spinner,
+.resume-manager-button-spinner {
+    animation: resume-manager-spin 900ms linear infinite;
+}
+
+.resume-manager-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 13px;
+
+    padding: 10px 12px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+
+    background: var(--color-background);
+
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.resume-manager-error {
+    color: var(--color-text);
+}
+
+.resume-manager-success {
+    color: var(--color-primary);
+}
+
+.resume-manager-empty-state {
+    width: 100%;
+}
+
+.resume-manager-empty {
+    min-height: 130px;
+
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    padding: 20px;
+
+    border: 1px dashed var(--color-border);
+    border-radius: 10px;
+
+    background: var(--color-background);
+}
+
+.resume-manager-empty-icon {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+
+    background: var(--color-surface);
+    color: var(--color-primary);
+}
+
+.resume-manager-empty-content {
+    min-width: 0;
+}
+
+.resume-manager-empty-content h3 {
+    margin: 0;
+
+    color: var(--color-text);
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.resume-manager-empty-content p {
+    max-width: 520px;
+
+    margin: 5px 0 0;
+
+    color: var(--color-text-secondary);
+
+    font-size: 10px;
+    line-height: 1.55;
+}
+
+.resume-manager-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.resume-manager-item {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 13px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+
+    background: var(--color-background);
+}
+
+.resume-manager-file-icon {
+    width: 38px;
+    height: 38px;
+
+    flex-shrink: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+
+    background: var(--color-surface);
+    color: var(--color-primary);
+}
+
+.resume-manager-file-info {
+    min-width: 0;
+
+    flex: 1;
+}
+
+.resume-manager-file-info h3 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    margin: 0;
+
+    color: var(--color-text);
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.resume-manager-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px 12px;
+
+    margin-top: 5px;
+}
+
+.resume-manager-meta span {
+    color: var(--color-text-secondary);
+
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.resume-manager-meta span:not(:last-child)::after {
+    content: "";
+
+    display: inline-block;
+
+    width: 3px;
+    height: 3px;
+
+    margin-left: 12px;
+
+    vertical-align: middle;
+
+    border-radius: 50%;
+
+    background: var(--color-border);
+}
+
+.resume-manager-actions {
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.resume-manager-action-button {
+    min-height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    padding: 7px 10px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+
+    background: var(--color-surface);
+    color: var(--color-text);
+
+    font: inherit;
+    font-size: 10px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+            background-color 160ms ease,
+            border-color 160ms ease,
+            color 160ms ease,
+            transform 160ms ease;
+}
+
+.resume-manager-action-button:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-surface);
+}
+
+.resume-manager-action-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+
+    transform: none;
+}
+
+.resume-manager-replace {
+    margin-top: 15px;
+
+    padding: 15px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+
+    background: var(--color-background);
+}
+
+.resume-manager-replace-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+
+    margin-bottom: 13px;
+}
+
+.resume-manager-replace-label {
+    margin: 0 0 5px;
+
+    color: var(--color-primary);
+
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.resume-manager-replace-header h3 {
+    margin: 0;
+
+    color: var(--color-text);
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.resume-manager-replace-header p {
+    margin: 4px 0 0;
+
+    color: var(--color-text-secondary);
+
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.resume-manager-cancel-button {
+    width: 30px;
+    height: 30px;
+
+    flex-shrink: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+
+    cursor: pointer;
+
+    transition:
+            border-color 160ms ease,
+            color 160ms ease,
+            background-color 160ms ease;
+}
+
+.resume-manager-cancel-button:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-surface);
+}
+
+.resume-manager-replace .resume-upload {
+    margin: 0;
+}
+
+.resume-manager-replace .resume-upload-header {
+    margin-bottom: 13px;
+}
+
+.resume-manager-replace .resume-upload-dropzone {
+    min-height: 120px;
+}
+
+.resume-manager-replace .resume-upload-actions {
+    margin-top: 11px;
+}
+
+.resume-manager-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(15, 23, 42, 0.38);
+    backdrop-filter: blur(2px);
+}
+
+.resume-manager-delete-modal {
+    width: min(420px, 100%);
+
+    padding: 22px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+
+    background: var(--color-surface);
+
+    box-shadow:
+            0 18px 45px rgba(15, 23, 42, 0.16);
+
+    animation: resume-manager-modal-in 160ms ease-out;
+}
+
+.resume-manager-delete-modal-icon {
+    width: 42px;
+    height: 42px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 14px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+
+    background: var(--color-background);
+    color: var(--color-primary);
+}
+
+.resume-manager-delete-modal-content h3 {
+    margin: 0;
+
+    color: var(--color-text);
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.resume-manager-delete-modal-content p {
+    margin: 7px 0 0;
+
+    color: var(--color-text-secondary);
+
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.resume-manager-delete-modal-content strong {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.resume-manager-delete-modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+
+    margin-top: 20px;
+}
+
+.resume-manager-modal-cancel-button,
+.resume-manager-modal-delete-button {
+    min-height: 35px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    padding: 8px 12px;
+
+    border-radius: 7px;
+
+    font: inherit;
+    font-size: 10px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+            background-color 160ms ease,
+            border-color 160ms ease,
+            color 160ms ease;
+}
+
+.resume-manager-modal-cancel-button {
+    border: 1px solid var(--color-border);
+
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.resume-manager-modal-cancel-button:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.resume-manager-modal-delete-button {
+    border: 1px solid var(--color-border);
+
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.resume-manager-modal-delete-button:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.resume-manager-modal-cancel-button:disabled,
+.resume-manager-modal-delete-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.resume-manager-action-button:focus-visible,
+.resume-manager-cancel-button:focus-visible,
+.resume-manager-modal-cancel-button:focus-visible,
+.resume-manager-modal-delete-button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.25);
+    outline-offset: 2px;
+}
+
+@keyframes resume-manager-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes resume-manager-modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 900px) {
+    .resume-manager-item {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .resume-manager-file-info {
+        padding-top: 2px;
+    }
+
+    .resume-manager-actions {
+        width: 100%;
+        margin-left: 50px;
+    }
+}
+
+@media (max-width: 620px) {
+    .resume-manager {
+        padding: 19px;
+    }
+
+    .resume-manager-empty {
+        align-items: flex-start;
+    }
+
+    .resume-manager-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    .resume-manager-meta span:not(:last-child)::after {
+        display: none;
+    }
+
+    .resume-manager-actions {
+        margin-left: 0;
+    }
+
+    .resume-manager-action-button span {
+        display: none;
+    }
+
+    .resume-manager-action-button {
+        flex: 0 0 36px;
+        width: 36px;
+        padding: 7px;
+    }
+
+    .resume-manager-delete-modal {
+        padding: 19px;
+    }
+
+    .resume-manager-delete-modal-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .resume-manager-modal-cancel-button,
+    .resume-manager-modal-delete-button {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .resume-manager-spinner,
+    .resume-manager-button-spinner {
+        animation: none;
+    }
+
+    .resume-manager-delete-modal {
+        animation: none;
+    }
+
+    .resume-manager-action-button,
+    .resume-manager-cancel-button,
+    .resume-manager-modal-cancel-button,
+    .resume-manager-modal-delete-button {
+        transition: none;
+    }
+}

@@ -6,9 +6,16 @@
 .env
 .env.*
 !.env.example
+application-local.properties
+
+# Uploaded files
+backend/uploads/
+
+# Build artifacts
+backend/target/
+frontend/dist/
+frontend/node_modules/
 
 # OS
 .DS_Store
 Thumbs.db
-
-application-local.properties

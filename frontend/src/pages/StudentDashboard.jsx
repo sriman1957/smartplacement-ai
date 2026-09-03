@@ -2,7 +2,6 @@ import {
     ArrowUpRight,
     ChevronRight,
     Edit3,
-    FileText,
     LogOut,
     Sparkles,
 } from "lucide-react";
@@ -13,6 +12,7 @@ import {
     useState,
 } from "react";
 import { getStudentProfile } from "../services/profileService";
+import ResumeManager from "../components/ResumeManager";
 import ProfileForm from "../components/ProfileForm";
 import "./StudentDashboard.css";
 
@@ -125,7 +125,7 @@ function StudentDashboard({ onLogout }) {
     }, []);
 
     useEffect(() => {
-        loadProfile();
+        void loadProfile();
     }, [loadProfile]);
 
     const skills = useMemo(
@@ -321,8 +321,6 @@ function StudentDashboard({ onLogout }) {
             </main>
         );
     }
-
-    const initials = getInitials(profile.name);
 
     return (
         <main className="dashboard-page">
@@ -524,9 +522,9 @@ function StudentDashboard({ onLogout }) {
 
                         {skills.length > 0 ? (
                             <div className="dashboard-skills">
-                                {skills.map((skill) => (
+                                {skills.map((skill, index) => (
                                     <span
-                                        key={skill}
+                                        key={`${String(skill)}-${index}`}
                                         className="dashboard-skill"
                                     >
                                         {skill}
@@ -657,32 +655,7 @@ function StudentDashboard({ onLogout }) {
                         </div>
                     </section>
 
-                    <section className="dashboard-card dashboard-status-card">
-                        <div className="dashboard-card-header">
-                            <p className="dashboard-section-label">
-                                Placement
-                            </p>
-
-                            <h2>Resume status</h2>
-                        </div>
-
-                        <div className="dashboard-status-content">
-                            <div className="dashboard-status-icon">
-                                <FileText size={19} />
-                            </div>
-
-                            <div>
-                                <strong>
-                                    Resume upload pending
-                                </strong>
-
-                                <p>
-                                    Resume management will be
-                                    available in the next module.
-                                </p>
-                            </div>
-                        </div>
-                    </section>
+                    <ResumeManager />
 
                     <section className="dashboard-card dashboard-status-card">
                         <div className="dashboard-card-header">
