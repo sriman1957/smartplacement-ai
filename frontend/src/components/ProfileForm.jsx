@@ -52,6 +52,25 @@ function LinkedInIcon({ size = 16 }) {
     );
 }
 
+function RequiredMark() {
+    return (
+        <span
+            className="profile-form-required-mark"
+            aria-hidden="true"
+        >
+            *
+        </span>
+    );
+}
+
+function OptionalLabel() {
+    return (
+        <span className="profile-form-optional">
+            (optional)
+        </span>
+    );
+}
+
 function ProfileForm({
                          existingProfile = null,
                          onSuccess,
@@ -338,7 +357,8 @@ function ProfileForm({
                         <div className="profile-form-grid">
                             <div className="profile-form-field">
                                 <label htmlFor="phone">
-                                    Phone number
+                                    Phone number{" "}
+                                    <RequiredMark />
                                 </label>
 
                                 <input
@@ -350,6 +370,7 @@ function ProfileForm({
                                     placeholder="9876543210"
                                     disabled={isSubmitting}
                                     autoComplete="tel"
+                                    required
                                 />
                             </div>
                         </div>
@@ -369,7 +390,8 @@ function ProfileForm({
                         <div className="profile-form-grid">
                             <div className="profile-form-field profile-form-field-full">
                                 <label htmlFor="college">
-                                    College
+                                    College{" "}
+                                    <RequiredMark />
                                 </label>
 
                                 <input
@@ -380,12 +402,14 @@ function ProfileForm({
                                     onChange={handleChange}
                                     placeholder="Your college or university"
                                     disabled={isSubmitting}
+                                    required
                                 />
                             </div>
 
                             <div className="profile-form-field">
                                 <label htmlFor="degree">
-                                    Degree
+                                    Degree{" "}
+                                    <RequiredMark />
                                 </label>
 
                                 <input
@@ -396,12 +420,14 @@ function ProfileForm({
                                     onChange={handleChange}
                                     placeholder="B.Tech"
                                     disabled={isSubmitting}
+                                    required
                                 />
                             </div>
 
                             <div className="profile-form-field">
                                 <label htmlFor="branch">
-                                    Branch
+                                    Branch{" "}
+                                    <RequiredMark />
                                 </label>
 
                                 <input
@@ -412,12 +438,14 @@ function ProfileForm({
                                     onChange={handleChange}
                                     placeholder="Computer Science and Engineering"
                                     disabled={isSubmitting}
+                                    required
                                 />
                             </div>
 
                             <div className="profile-form-field">
                                 <label htmlFor="graduationYear">
-                                    Graduation year
+                                    Graduation year{" "}
+                                    <RequiredMark />
                                 </label>
 
                                 <input
@@ -430,6 +458,7 @@ function ProfileForm({
                                     disabled={isSubmitting}
                                     min="2016"
                                     max="2036"
+                                    required
                                 />
                             </div>
                         </div>
@@ -448,7 +477,8 @@ function ProfileForm({
 
                         <div className="profile-form-field profile-form-field-full">
                             <label htmlFor="skills">
-                                Skills
+                                Skills{" "}
+                                <RequiredMark />
                             </label>
 
                             <input
@@ -459,6 +489,7 @@ function ProfileForm({
                                 onChange={handleChange}
                                 placeholder="Go, Java, Spring Boot, React, MySQL"
                                 disabled={isSubmitting}
+                                required
                             />
 
                             <span className="profile-form-help">
@@ -482,7 +513,8 @@ function ProfileForm({
                             <div className="profile-form-field">
                                 <label htmlFor="githubUrl">
                                     <GitHubIcon size={15} />
-                                    GitHub URL
+                                    GitHub URL{" "}
+                                    <OptionalLabel />
                                 </label>
 
                                 <input
@@ -499,7 +531,8 @@ function ProfileForm({
                             <div className="profile-form-field">
                                 <label htmlFor="linkedinUrl">
                                     <LinkedInIcon size={15} />
-                                    LinkedIn URL
+                                    LinkedIn URL{" "}
+                                    <OptionalLabel />
                                 </label>
 
                                 <input
@@ -515,7 +548,8 @@ function ProfileForm({
 
                             <div className="profile-form-field profile-form-field-full">
                                 <label htmlFor="portfolioUrl">
-                                    Portfolio URL
+                                    Portfolio URL{" "}
+                                    <OptionalLabel />
                                 </label>
 
                                 <input
@@ -531,7 +565,8 @@ function ProfileForm({
 
                             <div className="profile-form-field profile-form-field-full">
                                 <label htmlFor="profilePhotoUrl">
-                                    Profile photo URL
+                                    Profile photo URL{" "}
+                                    <OptionalLabel />
                                 </label>
 
                                 <input
@@ -565,7 +600,8 @@ function ProfileForm({
 
                         <div className="profile-form-field profile-form-field-full">
                             <label htmlFor="careerObjective">
-                                Career objective
+                                Career objective{" "}
+                                <RequiredMark />
                             </label>
 
                             <textarea
@@ -576,6 +612,7 @@ function ProfileForm({
                                 placeholder="Describe the type of role you want and the kind of software work you want to pursue."
                                 disabled={isSubmitting}
                                 rows="5"
+                                required
                             />
 
                             <span className="profile-form-help">

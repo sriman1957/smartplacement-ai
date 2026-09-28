@@ -20,6 +20,7 @@ import {
     getResumeFile,
 } from "../services/resumeService";
 import ResumeUpload from "./ResumeUpload";
+import ResumeAnalysis from "./ResumeAnalysis";
 import "./ResumeManager.css";
 
 function formatFileSize(bytes) {
@@ -606,6 +607,12 @@ function ResumeManager() {
                         </article>
                     ))}
                 </div>
+            )}
+
+            {!isReplacing && (
+                <ResumeAnalysis
+                    resume={resumes[0] || null}
+                />
             )}
 
             {isReplacing && (

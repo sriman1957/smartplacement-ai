@@ -313,6 +313,19 @@
     }
 }
 
+.profile-form-required-mark {
+    margin-left: 3px;
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.profile-form-optional {
+    margin-left: 5px;
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 400;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .profile-form-back-button,
     .profile-form-field input,

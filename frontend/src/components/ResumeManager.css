@@ -657,3 +657,59 @@
         transition: none;
     }
 }
+
+/* =========================================================
+   AI analysis two-column dashboard layout
+   ========================================================= */
+
+.resume-manager {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: start;
+}
+
+.resume-manager > .resume-manager-header {
+    grid-column: 1 / -1;
+}
+
+.resume-manager > .resume-manager-message {
+    grid-column: 1 / -1;
+}
+
+.resume-manager > .resume-manager-list {
+    grid-column: 1;
+}
+
+.resume-manager > .resume-manager-empty-state {
+    grid-column: 1;
+}
+
+.resume-manager > .resume-analysis {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 0;
+    align-self: start;
+}
+
+.resume-manager > .resume-manager-replace {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+    .resume-manager {
+        grid-template-columns: 1fr;
+    }
+
+    .resume-manager > .resume-analysis {
+        grid-column: 1;
+        grid-row: auto;
+        margin-top: 16px;
+    }
+
+    .resume-manager > .resume-manager-list,
+    .resume-manager > .resume-manager-empty-state {
+        grid-column: 1;
+    }
+}

@@ -4,6 +4,7 @@ import com.vhub.smartplacement.dto.ResumeResponse;
 import com.vhub.smartplacement.entity.Resume;
 import com.vhub.smartplacement.entity.User;
 import com.vhub.smartplacement.exception.ResumeNotFoundException;
+import com.vhub.smartplacement.repository.ResumeAnalysisRepository;
 import com.vhub.smartplacement.repository.ResumeRepository;
 import com.vhub.smartplacement.repository.UserRepository;
 
@@ -23,17 +24,20 @@ import java.util.UUID;
 public class ResumeService {
 
     private final ResumeRepository resumeRepository;
+    private final ResumeAnalysisRepository resumeAnalysisRepository;
     private final UserRepository userRepository;
     private final ResumeFileValidationService resumeFileValidationService;
     private final Path resumeUploadDirectory;
 
     public ResumeService(
             ResumeRepository resumeRepository,
+            ResumeAnalysisRepository resumeAnalysisRepository,
             UserRepository userRepository,
             ResumeFileValidationService resumeFileValidationService,
             @Qualifier("resumeUploadDirectory") Path resumeUploadDirectory
     ) {
         this.resumeRepository = resumeRepository;
+        this.resumeAnalysisRepository = resumeAnalysisRepository;
         this.userRepository = userRepository;
         this.resumeFileValidationService = resumeFileValidationService;
         this.resumeUploadDirectory = resumeUploadDirectory;
@@ -119,8 +123,13 @@ public class ResumeService {
                         )
                 );
 
+        // Delete all AI analyses associated with this resume first.
+        resumeAnalysisRepository.deleteByResume(resume);
+
+        // Delete the physical file if it still exists.
         deletePhysicalFile(resume.getFilePath());
 
+        // Finally delete the resume database record.
         resumeRepository.delete(resume);
     }
 
@@ -226,10 +235,17 @@ public class ResumeService {
 
             if (!existingResume.getId().equals(newResume.getId())) {
 
+                // Delete AI analyses belonging to the old resume first.
+                resumeAnalysisRepository.deleteByResume(
+                        existingResume
+                );
+
+                // Delete the physical file if it still exists.
                 deletePhysicalFile(
                         existingResume.getFilePath()
                 );
 
+                // Delete the old resume database record.
                 resumeRepository.delete(existingResume);
             }
         }

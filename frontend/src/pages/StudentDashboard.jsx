@@ -3,7 +3,6 @@ import {
     ChevronRight,
     Edit3,
     LogOut,
-    Sparkles,
 } from "lucide-react";
 import {
     useCallback,
@@ -656,70 +655,6 @@ function StudentDashboard({ onLogout }) {
                     </section>
 
                     <ResumeManager />
-
-                    <section className="dashboard-card dashboard-status-card">
-                        <div className="dashboard-card-header">
-                            <p className="dashboard-section-label">
-                                AI
-                            </p>
-
-                            <h2>AI analysis status</h2>
-                        </div>
-
-                        <div className="dashboard-status-content">
-                            <div className="dashboard-status-icon">
-                                <Sparkles size={19} />
-                            </div>
-
-                            <div>
-                                <strong>
-                                    Analysis not available yet
-                                </strong>
-
-                                <p>
-                                    AI resume analysis will be
-                                    available after resume setup.
-                                </p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section className="dashboard-card dashboard-next-action-card">
-                        <div className="dashboard-card-header">
-                            <p className="dashboard-section-label">
-                                Next step
-                            </p>
-
-                            <h2>Recommended next action</h2>
-                        </div>
-
-                        <div className="dashboard-next-action">
-                            <div>
-                                <strong>
-                                    Complete your placement
-                                    profile
-                                </strong>
-
-                                <p>
-                                    Keep your academic, skills, and
-                                    professional information
-                                    complete before adding your
-                                    resume.
-                                </p>
-                            </div>
-
-                            <button
-                                type="button"
-                                className="dashboard-secondary-button"
-                                onClick={handleEditProfile}
-                            >
-                                <Edit3 size={16} />
-                                <span>
-                                    Review profile
-                                </span>
-                            </button>
-                        </div>
-                    </section>
 
                     <section className="dashboard-card dashboard-career-card">
                         <div className="dashboard-card-header">

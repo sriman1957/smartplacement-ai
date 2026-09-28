@@ -99,9 +99,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleResumeNotFoundException(
             ResumeNotFoundException exception
     ) {
-        Map<String, String> error = Map.of( "message", exception.getMessage() );
+        Map<String, String> error = Map.of(
+                "message",
+                exception.getMessage()
+        );
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(error);
     }
 
     @ExceptionHandler(ResumeValidationException.class)
@@ -115,6 +120,25 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .badRequest()
+                .body(error);
+    }
+
+    @ExceptionHandler(AIAnalysisException.class)
+    public ResponseEntity<Map<String, String>> handleAIAnalysisException(
+            AIAnalysisException exception
+    ) {
+        logger.warn(
+                "Resume AI analysis failed: {}",
+                exception.getMessage()
+        );
+
+        Map<String, String> error = Map.of(
+                "message",
+                exception.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(error);
     }
 
