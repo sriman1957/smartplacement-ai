@@ -2,80 +2,99 @@
 
 > **Document type:** Developer guide  
 > **Audience:** Contributors and maintainers  
-> **Scope:** Local development, configuration, startup, and verification
-
-## Before You Begin
-
-This guide assumes a local development environment. Values such as credentials, secrets, filesystem paths, and provider configuration are environment-specific and must not be copied from documentation into source control.
+> **Status:** Maintained  
+> **Source of truth:** Current repository implementation  
+> **Scope:** Local development, configuration, startup, verification, and troubleshooting
 
 ## Contents
 
 - Prerequisites
 - Repository layout
-- Backend configuration
+- Configuration
 - Database
 - Resume storage
 - Backend startup
 - Frontend startup
 - Verification
+- Troubleshooting
 - First-run checklist
 
 ---
 
-# SmartPlacement-AI Setup Guide
-
 ## 1. Prerequisites
+
 - Java 21
 - MySQL
 - Node.js
 - npm
 - Git
 
+The project uses the Maven wrapper for backend builds and npm for frontend dependency management.
+
 ## 2. Repository Layout
+
 ~~~text
 SmartPlacement-AI/
 |-- backend/
 |   |-- pom.xml
 |   |-- mvnw
 |   |-- mvnw.cmd
-|   `-- src/
+|   +-- src/
 |-- frontend/
 |   |-- package.json
 |   |-- package-lock.json
-|   `-- src/
+|   +-- src/
 |-- docs/
-`-- README.md
++-- README.md
 ~~~
 
-## 3. Backend Configuration
-The committed application.properties activates the local Spring profile. The repository does not contain a committed application-local.properties file, so local datasource, JWT, file-storage, multipart, and AI configuration must be supplied by the local runtime configuration.
+## 3. Configuration
 
-Required configuration areas include:
-- MySQL datasource
-- JPA/Hibernate behavior
-- jwt.secret
-- jwt.expiration
-- app.file.upload-dir
-- app.file.max-size
-- Multipart request limits
-- AI provider configuration
+The committed application.properties activates the local Spring profile. The repository does not contain a committed application-local.properties file.
 
-Secrets must remain outside source control.
+The local runtime must supply the environment-specific values required by the application, including:
+
+| Configuration area | Purpose |
+|---|---|
+| MySQL datasource | Database connection |
+| JPA/Hibernate | Persistence behavior |
+| jwt.secret | JWT signing secret |
+| jwt.expiration | JWT lifetime |
+| app.file.upload-dir | Resume filesystem location |
+| app.file.max-size | Application resume size limit |
+| Multipart limits | HTTP upload limits |
+| AI provider configuration | AI service access |
+
+Do not commit passwords, JWT secrets, AI credentials, or other private configuration.
 
 ## 4. Database
-The backend uses MySQL with Spring Data JPA and Hibernate. The repository does not contain a committed SQL migration directory. Database schema creation and update behavior therefore depends on the active Spring/JPA configuration.
+
+The backend uses MySQL through Spring Data JPA and Hibernate.
+
+The repository does not contain a committed SQL migration directory. Schema creation and update behavior therefore depends on the active Spring/JPA configuration. A production deployment should establish an explicit database migration strategy before treating the schema as release-managed infrastructure.
 
 ## 5. Resume Storage
-FileStorageConfig creates the configured resume directory during application startup. The directory is normalized to an absolute path. ResumeService generates UUID-based stored filenames.
 
-## 6. Start Backend
+FileStorageConfig creates the configured resume directory during application startup. Stored resume filenames are generated as UUID-based names. Original filenames are retained only as sanitized metadata.
+
+The configured storage directory is part of application state and must be writable by the backend process.
+
+## 6. Start the Backend
+
 From the backend directory:
 
 ~~~powershell
 .\mvnw.cmd spring-boot:run
 ~~~
 
-## 7. Start Frontend
+The frontend currently expects the backend API at:
+
+~~~text
+http://localhost:8080/api
+~~~
+
+## 7. Start the Frontend
+
 From the frontend directory:
 
 ~~~bash
@@ -83,15 +102,66 @@ npm install
 npm run dev
 ~~~
 
-## 8. Frontend Validation
+The current backend CORS configuration permits:
+
+~~~text
+http://localhost:5173
+~~~
+
+## 8. Verification
+
+Backend:
+
+~~~powershell
+.\mvnw.cmd clean test
+~~~
+
+Frontend:
+
 ~~~bash
 npm run lint
 npm run build
 npm run preview
 ~~~
 
-## 9. Runtime API
-The current Axios client uses http://localhost:8080/api as its base URL. The backend therefore needs to be reachable on port 8080 for the current frontend configuration.
+A successful setup should allow registration, login, profile operations, resume upload/download/delete, and authenticated role-aware resume analysis.
 
-## 10. Security Configuration
-The backend currently permits the local frontend origin http://localhost:5173. Production deployment requires an explicit production origin configuration.
+## 9. Troubleshooting
+
+### Frontend cannot reach the backend
+
+Verify that the Spring Boot application is running on port 8080 and that the frontend is using the expected API base URL.
+
+### Browser reports a CORS error
+
+Verify that the frontend origin matches the configured backend origin. The current development configuration permits http://localhost:5173.
+
+### Resume upload fails
+
+Check the file extension, detected document type, configured application size limit, multipart request limits, and write permissions for the resume storage directory.
+
+### AI analysis returns 503
+
+The backend maps AI processing failures to 503 Service Unavailable. Check the local AI provider configuration and backend logs without exposing provider credentials.
+
+### Database connection fails
+
+Verify that MySQL is running and that the local datasource URL, username, password, and database configuration match the local environment.
+
+## 10. First-Run Checklist
+
+1. Install prerequisites.
+2. Configure local MySQL access.
+3. Configure JWT settings.
+4. Configure resume storage.
+5. Configure the integrated AI provider.
+6. Start the backend.
+7. Start the frontend.
+8. Run backend tests.
+9. Run frontend lint and build.
+10. Register a student account.
+11. Create the student profile.
+12. Upload a PDF or DOCX resume.
+13. Verify resume metadata and file retrieval.
+14. Run role-aware analysis.
+15. Verify that protected resources cannot be accessed without authentication.
