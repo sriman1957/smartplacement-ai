@@ -1,3 +1,30 @@
+# Testing and Verification
+
+> **Document type:** Verification guide  
+> **Audience:** Developers, reviewers, maintainers, and release owners  
+> **Scope:** Automated tests, frontend verification, regression coverage, and release checks
+
+## Verification Philosophy
+
+Tests are organized around application boundaries and observable behavior. Particular attention is given to authentication, ownership, file handling, AI response validation, and role-aware persistence because failures in these areas can affect correctness or security.
+
+## Contents
+
+- Testing objectives
+- Backend test structure
+- Application context verification
+- Prompt builder verification
+- Provider boundary verification
+- AI service verification
+- Resume analysis verification
+- Text extraction verification
+- Backend execution
+- Frontend verification
+- Verification matrix
+- Release regression checklist
+
+---
+
 # SmartPlacement-AI Testing Guide
 
 ## 1. Testing Strategy
