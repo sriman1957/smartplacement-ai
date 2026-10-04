@@ -2,116 +2,269 @@
 
 > **Document type:** Architecture reference  
 > **Audience:** Developers, reviewers, maintainers, and technical evaluators  
-> **Scope:** Application structure, boundaries, runtime flow, and design decisions
-
-## Document Conventions
-
-This document describes the architecture implemented in the repository. It intentionally distinguishes implemented behavior from operational recommendations. It does not prescribe an alternative architecture.
+> **Status:** Maintained  
+> **Source of truth:** Current repository implementation  
+> **Scope:** System structure, boundaries, runtime flows, persistence, security boundaries, and architectural decisions
 
 ## Contents
 
 - System context
 - Architectural boundaries
-- Backend responsibilities
-- Authentication architecture
-- Resume architecture
-- AI analysis architecture
+- Component responsibilities
+- Dependency direction
+- Runtime flows
+- Security and trust boundary
 - Persistence relationships
-- Frontend architecture
-- Error boundary
+- Architectural decisions
 - Design principles
+- Related documentation
 
 ---
 
-# SmartPlacement-AI Architecture
+## 1. System Context
 
-## 1. System Overview
-SmartPlacement-AI is a full-stack student placement platform built with a React frontend and Spring Boot backend. The backend separates HTTP controllers, application services, persistence repositories, security, document processing, and AI analysis.
+SmartPlacement-AI is a full-stack student placement platform. The React frontend communicates with a Spring Boot REST API. The backend owns authentication, authorization, profile management, resume lifecycle, text extraction, AI analysis orchestration, and persistence.
 
 ~~~text
+Student
+   |
+   v
 React Frontend
-     |
-     | HTTP / JSON / multipart + Bearer JWT
-     v
+   | HTTP / JSON / multipart + Bearer JWT
+   v
 Spring Boot REST API
-     |
-     +--> Spring Security / JWT
-     +--> Application Services
-     +--> JPA Repositories --> MySQL
-     +--> Resume File Storage
-     +--> Resume Text Extraction
-     +--> AI Provider Abstraction
+   |
+   +--> Spring Security / JWT
+   +--> Application Services
+   +--> Spring Data JPA --> MySQL
+   +--> Resume File Storage
+   +--> Apache Tika
+   +--> AI Provider abstraction --> Integrated AI provider
 ~~~
 
-## 2. Backend Layers
-### Controllers
-REST controllers expose the application contract. The principal controllers are AuthController, HealthController, StudentProfileController, ProfileController, ResumeController, and AIResumeAnalysisController.
+The browser is a client and is not an authorization boundary. The backend is authoritative for authenticated identity, resource ownership, validation, and protected operations.
 
-### Services
-Services implement application workflows including authentication, profile management, resume lifecycle management, text extraction, and role-aware analysis.
+## 2. Architectural Boundaries
 
-### Repositories
-Spring Data JPA repositories provide persistence access for users, profiles, resumes, and resume analyses. Ownership-aware queries are used for protected resume operations.
+### Frontend boundary
 
-### Entities
-The core domain entities are User, StudentProfile, Resume, and ResumeAnalysis.
+The frontend is responsible for presentation, user interaction, client-side form validation, authentication state handling, and API communication. Axios centralizes HTTP behavior and attaches the JWT from browser local storage to protected requests.
 
-## 3. Authentication Flow
-Registration validates the request, checks unique email and username values, hashes the password with BCrypt, creates a STUDENT user, and returns the registration response.
+The frontend must not be treated as the source of truth for authorization or resource ownership.
 
-Login validates credentials and issues a signed JWT. Protected requests pass through JwtAuthenticationFilter, which validates the JWT, extracts the email, loads the user, and establishes the Spring Security context.
+### Backend boundary
 
-## 4. Resume Flow
-Resume uploads are handled as multipart requests. ResumeFileValidationService validates presence, size, extension, and detected content type. ResumeService sanitizes the original filename, generates a UUID-based stored filename, persists metadata, and stores the physical file.
+The Spring Boot application is the application and security boundary. Controllers translate HTTP requests into application operations. Services implement business workflows. Repositories provide persistence access. Specialized services isolate filesystem, document extraction, and AI provider concerns.
 
-Resume operations resolve the authenticated user before accessing a resume. This prevents direct ID-based access to another user's documents.
+### Persistence boundary
 
-Uploading a new resume replaces the user's existing resume. Existing analysis records and the previous physical file are removed before the old resume record is deleted.
+MySQL stores application state and resume metadata. Resume binary content is stored in the configured filesystem directory rather than in database blobs.
 
-## 5. AI Analysis Flow
+### AI boundary
+
+AIProvider isolates the external AI capability from the application workflow. Resume content and AI output cross this boundary as untrusted data and are validated before persisted application state is updated.
+
+## 3. Component Responsibilities
+
+| Component | Responsibility |
+|---|---|
+| Controllers | HTTP routing, authentication context access, request/response mapping |
+| Services | Business workflows and application rules |
+| Repositories | Database access through Spring Data JPA |
+| Security | JWT authentication, endpoint protection, CORS, stateless sessions |
+| Resume validation | File type, content, and upload validation |
+| File storage | Controlled filesystem persistence and path validation |
+| Text extraction | Apache Tika based resume text extraction |
+| AI prompt builder | Role-specific evaluation instructions and output contract |
+| AI provider abstraction | Provider integration boundary |
+| Exception handler | Consistent client-safe application errors |
+| React services | Frontend API integration |
+
+## 4. Dependency Direction
+
+The application follows a layered dependency direction:
+
 ~~~text
-POST /api/ai/resume-analyze/{resumeId}
-             |
-             v
+HTTP / React client
+       |
+       v
+Controllers
+       |
+       v
+Application Services
+       |
+       +------> Repositories ------> MySQL
+       |
+       +------> File storage
+       |
+       +------> Text extraction
+       |
+       +------> AI abstraction ------> AI provider
+~~~
+
+Business workflows remain in services rather than controllers. Resource ownership checks are performed on the backend before protected resume operations proceed.
+
+## 5. Runtime Flows
+
+### Authentication
+
+~~~text
+Login request
+    |
+    v
+AuthController
+    |
+    v
+Authentication / Spring Security
+    |
+    +--> Verify BCrypt password
+    +--> Issue signed JWT
+    v
+JWT returned to client
+    |
+    v
+Protected API request
+    |
+    v
+JwtAuthenticationFilter
+    |
+    +--> Validate token
+    +--> Resolve authenticated user
+    v
+Spring Security context
+    |
+    v
+Protected controller/service
+~~~
+
+The application uses stateless sessions. Public access is limited to the health endpoint and authentication endpoints. TRACE requests are explicitly denied.
+
+### Resume upload
+
+~~~text
+Multipart upload
+      |
+      v
+ResumeController
+      |
+      v
+ResumeService
+      |
+      +--> Validate extension, size, and detected content type
+      +--> Sanitize original filename
+      +--> Generate UUID-based stored filename
+      +--> Write file to configured storage directory
+      +--> Persist resume metadata
+      +--> Remove previous resume and analyses
+      v
+ResumeResponse
+~~~
+
+### AI analysis
+
+~~~text
+resumeId + jobTitle
+       |
+       v
+AIResumeAnalysisController
+       |
+       v
 ResumeAnalysisService
-             |
-             +--> ownership validation
-             +--> text extraction
-             +--> AI analysis
-             +--> response validation
-             +--> create/update persistence
-             v
+       |
+       +--> Resolve authenticated user
+       +--> Verify resume ownership
+       +--> Extract resume text
+       +--> Build role-aware prompt
+       +--> Invoke AI provider
+       +--> Validate structured AI result
+       +--> Create/update ResumeAnalysis
+       v
 ResumeAnalysisResponse
 ~~~
 
-AIProvider is the provider boundary. AIResumeAnalyzerServiceImpl handles validation and provider invocation, while ResumeAnalysisService owns the end-to-end application workflow.
+The same resume can be evaluated for multiple target roles. The persisted analysis identity is the combination of resume_id and job_title.
 
-AIResumePromptBuilder defines role-specific evaluation criteria and a structured output contract.
+## 6. Security and Trust Boundary
 
-## 6. Frontend Architecture
-The React application is organized around authentication screens, the student dashboard, profile management, resume management, and resume analysis.
+~~~text
+UNTRUSTED INPUT
+Browser input / uploaded file / extracted resume text / AI output
+        |
+        v
+Backend validation + authorization
+        |
+        +--> Authentication
+        +--> Ownership checks
+        +--> File validation
+        +--> Path containment
+        +--> AI output validation
+        v
+Persisted application state
+~~~
 
-Axios is centralized in services/api.js. Its request interceptor reads the JWT from browser local storage and adds the Bearer Authorization header.
-
-Service modules isolate API calls from UI components. Resume downloads use binary blob responses.
+Uploaded resume text can contain adversarial instructions. The AI prompt explicitly treats resume content as evidence rather than executable instructions. AI output is also treated as untrusted until application validation succeeds.
 
 ## 7. Persistence Relationships
+
 ~~~text
 User 1 -------- 1 StudentProfile
 User 1 -------- N Resume
 Resume 1 ------ N ResumeAnalysis
 ~~~
 
-ResumeAnalysis has a unique constraint on the combination of resume_id and job_title. This permits the same resume to be evaluated independently for different target roles.
+A resume analysis cannot be meaningfully addressed independently of its parent resume. Resume deletion and replacement clean up associated analyses and physical files.
 
-## 8. Error Handling
-GlobalExceptionHandler converts application and framework exceptions into controlled JSON responses. Spring Security separately handles unauthenticated and access-denied requests.
+## 8. Architectural Decisions
 
-## 9. Architectural Principles
-- Controllers handle HTTP concerns.
-- Services own business workflows.
-- Repositories own persistence access.
+### Stateless JWT authentication
+
+**Decision:** Use signed JWTs with stateless Spring Security sessions.
+
+**Reason:** The frontend and backend communicate through a REST API without requiring server-side session state.
+
+**Consequence:** Token lifetime, secret protection, and client-side token handling remain important security concerns.
+
+### Role-aware analysis
+
+**Decision:** Include the target job title as an explicit analysis input and apply role-specific criteria where supported.
+
+**Reason:** Resume suitability depends on the intended technical role.
+
+**Consequence:** The same resume can produce different analyses for different roles, and the role becomes part of analysis identity.
+
+### Filesystem storage for resume binaries
+
+**Decision:** Store resume binary content on the configured filesystem and persist metadata in MySQL.
+
+**Reason:** The current implementation separates binary document storage from relational application state.
+
+**Consequence:** File permissions, backup, path integrity, and storage lifecycle must be managed alongside database state.
+
+### AI provider abstraction
+
+**Decision:** Keep provider interaction behind AIProvider.
+
+**Reason:** Application workflows should not depend directly on provider-specific client implementation.
+
+**Consequence:** Provider integration can change without moving AI concerns into controllers or persistence.
+
+## 9. Design Principles
+
 - Backend authorization is authoritative.
-- Uploaded documents are treated as untrusted input.
-- AI provider interaction is isolated behind an abstraction.
-- Internal exception details are not exposed to API clients.
+- Controllers handle HTTP concerns rather than business workflows.
+- Services own application behavior.
+- Repositories own persistence access.
+- Uploaded documents are untrusted input.
+- AI responses are untrusted external data until validated.
+- Resource ownership is enforced with authenticated identity.
+- Provider-specific AI behavior is isolated behind an abstraction.
+- Internal implementation details are not exposed through API errors.
+
+## 10. Related Documentation
+
+- setup.md - local development and configuration
+- api.md - HTTP API contract
+- database.md - persistence model
+- security.md - security controls and threat model
+- ai-analysis.md - AI subsystem contract
+- testing.md - verification strategy
