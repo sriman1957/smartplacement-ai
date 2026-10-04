@@ -101,7 +101,7 @@ The resume module supports:
 - Path traversal protection
 - Related analysis cleanup
 
-The application enforces a 10 MB application-level resume size limit.
+The application-level resume size limit is configured through app.file.max-size. The documented project configuration uses a 10 MB limit.
 
 ### AI-Powered Resume Analysis
 
@@ -459,7 +459,7 @@ npm run build
 
 ## Configuration
 
-The application uses the local Spring profile for development.
+The application activates the local Spring profile for development. The repository does not contain a committed application-local.properties file, so local datasource, JWT, file-storage, multipart, and AI configuration must be supplied through the local runtime configuration.
 
 Environment-specific configuration provides values such as:
 
