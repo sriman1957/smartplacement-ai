@@ -1,3 +1,30 @@
+# Resume Analysis
+
+> **Document type:** Feature and subsystem reference  
+> **Audience:** Backend developers, AI integration engineers, reviewers, and maintainers  
+> **Scope:** Inputs, extraction, role-aware evaluation, provider boundary, validation, persistence, and failure semantics
+
+## Feature Contract
+
+Resume analysis is a role-aware evaluation workflow. The target job title is an explicit input and forms part of the persisted analysis identity. The subsystem is designed to produce structured, evidence-based feedback rather than an unbounded natural-language response.
+
+## Contents
+
+- Purpose
+- Processing pipeline
+- Input contract
+- Text extraction
+- Role-aware evaluation
+- Evaluation rules
+- Structured output contract
+- Provider boundary
+- Response validation
+- Persistence semantics
+- Failure semantics
+- Trust boundary
+
+---
+
 # SmartPlacement-AI Resume Analysis
 
 ## 1. Purpose
