@@ -33,14 +33,20 @@ public class ResumeFileValidationService {
         this.tika = new Tika();
     }
 
-    public void validate(MultipartFile file) throws IOException {
+    public void validate(
+            MultipartFile file
+    ) throws IOException {
+
         validateFilePresent(file);
         validateFileSize(file);
         validateExtension(file);
         validateContentType(file);
     }
 
-    private void validateFilePresent(MultipartFile file) {
+    private void validateFilePresent(
+            MultipartFile file
+    ) {
+
         if (file == null || file.isEmpty()) {
             throw new ResumeValidationException(
                     "Resume file is required"
@@ -48,26 +54,43 @@ public class ResumeFileValidationService {
         }
     }
 
-    private void validateFileSize(MultipartFile file) {
+    private void validateFileSize(
+            MultipartFile file
+    ) {
+
         if (file.getSize() > maxFileSize) {
+
+            long maxSizeInMb =
+                    maxFileSize / (1024 * 1024);
+
             throw new ResumeValidationException(
-                    "Resume file size must not exceed 10 MB"
+                    "Resume file size must not exceed "
+                            + maxSizeInMb
+                            + " MB"
             );
         }
     }
 
-    private void validateExtension(MultipartFile file) {
-        String originalFileName = file.getOriginalFilename();
+    private void validateExtension(
+            MultipartFile file
+    ) {
 
-        if (originalFileName == null || originalFileName.isBlank()) {
+        String originalFileName =
+                file.getOriginalFilename();
+
+        if (originalFileName == null ||
+                originalFileName.isBlank()) {
+
             throw new ResumeValidationException(
                     "Resume filename is required"
             );
         }
 
-        String extension = extractExtension(originalFileName);
+        String extension =
+                extractExtension(originalFileName);
 
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
+
             throw new ResumeValidationException(
                     "Only PDF and DOCX files are allowed"
             );
@@ -78,25 +101,34 @@ public class ResumeFileValidationService {
             MultipartFile file
     ) throws IOException {
 
-        String originalFileName = file.getOriginalFilename();
+        String originalFileName =
+                file.getOriginalFilename();
 
         String detectedContentType = tika.detect(
                 file.getInputStream(),
                 originalFileName
         );
 
-        if (!ALLOWED_CONTENT_TYPES.contains(detectedContentType)) {
+        if (!ALLOWED_CONTENT_TYPES.contains(
+                detectedContentType
+        )) {
+
             throw new ResumeValidationException(
                     "Invalid resume file content"
             );
         }
     }
 
-    private String extractExtension(String fileName) {
-        int lastDotIndex = fileName.lastIndexOf('.');
+    private String extractExtension(
+            String fileName
+    ) {
+
+        int lastDotIndex =
+                fileName.lastIndexOf('.');
 
         if (lastDotIndex < 0 ||
                 lastDotIndex == fileName.length() - 1) {
+
             return "";
         }
 

@@ -15,6 +15,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -36,29 +40,41 @@ public class SecurityConfig {
                 );
 
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
+
                 .cors(Customizer.withDefaults())
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
                 )
+
                 .authorizeHttpRequests(authorize -> authorize
+
+                        // Public endpoints.
                         .requestMatchers(
                                 "/api/health",
                                 "/api/auth/**"
                         ).permitAll()
+
+                        // Explicitly reject TRACE requests.
+                        .requestMatchers(HttpMethod.TRACE).denyAll()
+
+                        // Everything else requires authentication.
                         .anyRequest().authenticated()
                 )
+
                 .exceptionHandling(exception ->
-                        exception.authenticationEntryPoint(
-                                (request, response, exceptionObject) ->
-                                        response.sendError(
-                                                HttpServletResponse.SC_UNAUTHORIZED,
-                                                "Unauthorized"
-                                        )
-                        )
+                        exception
+                                .authenticationEntryPoint(
+                                        authenticationEntryPoint()
+                                )
+                                .accessDeniedHandler(
+                                        accessDeniedHandler()
+                                )
                 )
+
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -68,11 +84,57 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, exception) -> {
+
+            response.setStatus(
+                    HttpServletResponse.SC_UNAUTHORIZED
+            );
+
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            response.getWriter().write(
+                    """
+                    {
+                        "message": "Authentication is required"
+                    }
+                    """
+            );
+        };
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, exception) -> {
+
+            response.setStatus(
+                    HttpServletResponse.SC_FORBIDDEN
+            );
+
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            response.getWriter().write(
+                    """
+                    {
+                        "message": "You do not have permission to access this resource"
+                    }
+                    """
+            );
+        };
+    }
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+
+        CorsConfiguration configuration =
+                new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of(
+                        "http://localhost:5173"
+                )
         );
 
         configuration.setAllowedMethods(
@@ -86,8 +148,13 @@ public class SecurityConfig {
         );
 
         configuration.setAllowedHeaders(
-                List.of("*")
+                List.of(
+                        "Authorization",
+                        "Content-Type"
+                )
         );
+
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();

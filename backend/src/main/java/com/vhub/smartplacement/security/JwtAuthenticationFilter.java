@@ -3,6 +3,7 @@ package com.vhub.smartplacement.security;
 import com.vhub.smartplacement.service.CustomUserDetailsService;
 import com.vhub.smartplacement.service.JwtService;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,14 +14,18 @@ import java.io.IOException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final String BEARER_PREFIX = "Bearer ";
+
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter (
+    public JwtAuthenticationFilter(
             JwtService jwtService,
             CustomUserDetailsService userDetailsService
     ) {
@@ -33,29 +38,64 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain
-    ) throws ServletException , IOException {
-        String authorizationHeader = request.getHeader("Authorization");
+    ) throws ServletException, IOException {
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request , response);
+        String authorizationHeader =
+                request.getHeader("Authorization");
+
+        // No bearer token: let Spring Security handle access.
+        if (authorizationHeader == null
+                || !authorizationHeader.startsWith(BEARER_PREFIX)) {
+            filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authorizationHeader.substring(7);
+        String token = authorizationHeader
+                .substring(BEARER_PREFIX.length())
+                .trim();
 
-        if (!jwtService.isTokenValid(token)) {
-            filterChain.doFilter(request , response);
+        // Reject an empty bearer token.
+        if (token.isEmpty()) {
+            rejectUnauthorized(response);
             return;
         }
 
-        String email = jwtService.extractEmail(token);
+        final String email;
 
+        // Handle invalid, expired, or malformed JWTs.
+        try {
+            if (!jwtService.isTokenValid(token)) {
+                rejectUnauthorized(response);
+                return;
+            }
+
+            email = jwtService.extractEmail(token);
+
+            if (email == null || email.isBlank()) {
+                rejectUnauthorized(response);
+                return;
+            }
+
+        } catch (JwtException | IllegalArgumentException exception) {
+            rejectUnauthorized(response);
+            return;
+        }
+
+        // Avoid replacing an existing authenticated principal.
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService
-                    .loadUserByUsername(email);
+            final UserDetails userDetails;
+
+            try {
+                userDetails = userDetailsService
+                        .loadUserByUsername(email);
+            } catch (UsernameNotFoundException exception) {
+                // The account may have been deleted after token issuance.
+                rejectUnauthorized(response);
+                return;
+            }
 
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken (
+                    new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
                             userDetails.getAuthorities()
@@ -66,11 +106,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .buildDetails(request)
             );
 
-            SecurityContextHolder
-                    .getContext()
+            SecurityContextHolder.getContext()
                     .setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void rejectUnauthorized(
+            HttpServletResponse response
+    ) throws IOException {
+
+        SecurityContextHolder.clearContext();
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("WWW-Authenticate", "Bearer");
+
+        response.getWriter().write(
+                """
+                {
+                    "message": "Invalid or expired authentication token"
+                }
+                """
+        );
     }
 }

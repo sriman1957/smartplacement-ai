@@ -4,6 +4,7 @@ import com.vhub.smartplacement.dto.ResumeResponse;
 import com.vhub.smartplacement.entity.Resume;
 import com.vhub.smartplacement.entity.User;
 import com.vhub.smartplacement.exception.ResumeNotFoundException;
+import com.vhub.smartplacement.exception.ResumeValidationException;
 import com.vhub.smartplacement.repository.ResumeAnalysisRepository;
 import com.vhub.smartplacement.repository.ResumeRepository;
 import com.vhub.smartplacement.repository.UserRepository;
@@ -18,6 +19,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -55,6 +57,7 @@ public class ResumeService {
 
         String originalFileName = getSafeOriginalFileName(file);
         String extension = extractExtension(originalFileName);
+
         String storedFileName = UUID.randomUUID() + "." + extension;
 
         Path targetPath = resumeUploadDirectory.resolve(storedFileName);
@@ -99,9 +102,7 @@ public class ResumeService {
         Resume resume = resumeRepository
                 .findByIdAndUser(resumeId, user)
                 .orElseThrow(() ->
-                        new ResumeNotFoundException(
-                                "Resume not found"
-                        )
+                        new ResumeNotFoundException("Resume not found")
                 );
 
         return toResumeResponse(resume);
@@ -118,9 +119,7 @@ public class ResumeService {
         Resume resume = resumeRepository
                 .findByIdAndUser(resumeId, user)
                 .orElseThrow(() ->
-                        new ResumeNotFoundException(
-                                "Resume not found"
-                        )
+                        new ResumeNotFoundException("Resume not found")
                 );
 
         // Delete all AI analyses associated with this resume first.
@@ -143,12 +142,10 @@ public class ResumeService {
         Resume resume = resumeRepository
                 .findByIdAndUser(resumeId, user)
                 .orElseThrow(() ->
-                        new ResumeNotFoundException(
-                                "Resume not found"
-                        )
+                        new ResumeNotFoundException("Resume not found")
                 );
 
-        return Path.of(resume.getFilePath());
+        return resolveStoredFilePath(resume.getFilePath());
     }
 
     private User findUserByEmail(String email) {
@@ -200,7 +197,7 @@ public class ResumeService {
 
         return fileName
                 .substring(lastDotIndex + 1)
-                .toLowerCase();
+                .toLowerCase(Locale.ROOT);
     }
 
     private String detectFileType(
@@ -233,7 +230,8 @@ public class ResumeService {
 
         for (Resume existingResume : existingResumes) {
 
-            if (!existingResume.getId().equals(newResume.getId())) {
+            if (!existingResume.getId()
+                    .equals(newResume.getId())) {
 
                 // Delete AI analyses belonging to the old resume first.
                 resumeAnalysisRepository.deleteByResume(
@@ -259,11 +257,42 @@ public class ResumeService {
             return;
         }
 
-        Path path = Path.of(filePath);
+        Path path = resolveStoredFilePath(filePath);
 
         if (Files.exists(path)) {
             Files.delete(path);
         }
+    }
+
+    /**
+     * Resolves a stored resume path and guarantees that it remains
+     * inside the configured resume upload directory.
+     */
+    private Path resolveStoredFilePath(
+            String filePath
+    ) {
+
+        if (filePath == null || filePath.isBlank()) {
+            throw new ResumeValidationException(
+                    "Resume file path is invalid"
+            );
+        }
+
+        Path storageRoot = resumeUploadDirectory
+                .toAbsolutePath()
+                .normalize();
+
+        Path resolvedPath = Path.of(filePath)
+                .toAbsolutePath()
+                .normalize();
+
+        if (!resolvedPath.startsWith(storageRoot)) {
+            throw new ResumeValidationException(
+                    "Resume file path is invalid"
+            );
+        }
+
+        return resolvedPath;
     }
 
     private ResumeResponse toResumeResponse(

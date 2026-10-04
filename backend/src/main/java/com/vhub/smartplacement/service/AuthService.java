@@ -9,6 +9,8 @@ import com.vhub.smartplacement.exception.EmailAlreadyExistsException;
 import com.vhub.smartplacement.exception.UsernameAlreadyExistsException;
 import com.vhub.smartplacement.repository.UserRepository;
 
+import java.util.Locale;
+
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,7 +38,7 @@ public class AuthService {
         String firstName = request.getFirstName().trim();
         String lastName = request.getLastName().trim();
         String username = request.getUsername().trim();
-        String email = request.getEmail().trim().toLowerCase();
+        String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
 
         if (userRepository.findByEmail(email).isPresent()) {
             throw new EmailAlreadyExistsException(
@@ -98,7 +100,7 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
         String email =
-                request.getEmail().trim().toLowerCase();
+                request.getEmail().trim().toLowerCase(Locale.ROOT);
 
         User user =
                 userRepository.findByEmail(email)
