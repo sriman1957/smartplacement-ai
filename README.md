@@ -475,6 +475,7 @@ SmartPlacement-AI brings authentication, student profile management, resume hand
 
 The goal is to provide students with actionable, role-specific feedback on their resumes while maintaining secure backend processing and a clean separation between the frontend, business logic, persistence, and AI layers.
 
-## Repository
+## Author
 
-GitHub: https://github.com/sriman1957/smartplacement-ai
+Author: Sriman  
+Organization: VHUB-ITCS
