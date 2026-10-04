@@ -1,3 +1,28 @@
+# API Reference
+
+> **Document type:** HTTP API contract  
+> **Audience:** Frontend developers, API consumers, testers, and maintainers  
+> **Base path:** `/api`
+
+## Contract Rules
+
+The API reference documents the public application contract exposed by the backend. Authentication requirements, validation constraints, status codes, and response semantics are part of that contract.
+
+Clients must not depend on internal Java classes, database schema names, filesystem paths, or implementation-specific exception messages.
+
+## Contents
+
+- API conventions
+- Authentication
+- Health
+- Student profile
+- Resume management
+- Resume analysis
+- Error contract
+- Status codes
+
+---
+
 # SmartPlacement-AI API Reference
 
 ## 1. Conventions
