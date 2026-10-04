@@ -1,102 +1,84 @@
 # SmartPlacement-AI
 
-SmartPlacement-AI is an AI-powered student placement platform that helps students prepare for placement opportunities through secure profile management, resume management, and role-aware AI resume analysis.
+SmartPlacement-AI is an AI-powered student placement platform designed to help students prepare for technical placement opportunities through secure profile management, resume management, and role-aware resume analysis.
 
-The application provides an end-to-end workflow:
+## Overview
 
-1. Register an account.
-2. Log in securely using JWT authentication.
-3. Create and maintain a student placement profile.
-4. Upload and manage a resume.
-5. Select a target job role.
-6. Analyze the resume with the integrated AI provider.
-7. Review a structured analysis containing a score, skills, strengths, weaknesses, missing skills, recommendations, and a summary.
+SmartPlacement-AI provides a complete student-focused placement workflow:
 
-## Project Status
+1. Create an account and authenticate securely.
+2. Maintain a professional student profile.
+3. Upload and manage a resume.
+4. Select a target job role.
+5. Analyze the resume using the integrated AI system.
+6. Review structured feedback and identify areas for improvement.
 
-SmartPlacement-AI is implemented as a full-stack application with the following completed areas:
+The platform combines a React frontend with a Spring Boot REST API, MySQL persistence, secure JWT authentication, document processing, and AI-powered resume analysis.
 
-- Project foundation
-- User registration
-- Password hashing
-- JWT authentication
-- Protected REST APIs
-- Student profile management
-- Resume upload and management
-- PDF and DOCX validation
-- Resume text extraction
-- Role-aware AI resume analysis
-- Structured AI analysis persistence
-- Security hardening
-- Backend automated testing
-- Frontend production build
-- Technical documentation
+## Features
 
-## Core Features
+### Authentication
 
-### 1. Authentication
-
-- User registration
+- User registration and login
 - Unique username and email validation
-- Secure password hashing with BCrypt
-- Login using email and password
-- JWT token generation
-- Stateless Spring Security authentication
+- BCrypt password hashing
+- JWT-based authentication
+- Stateless Spring Security
 - JWT signature and expiration validation
-- Protected application endpoints
-- Username availability check
-- Authentication and authorization error handling
+- Protected REST endpoints
+- Username availability checking
+- Centralized authentication and authorization error handling
 
-### 2. Student Profile
+### Student Profile
 
-Students can maintain placement-oriented profile information including:
+Students can maintain placement-oriented information including:
 
-- First name and last name
+- Name
 - Phone number
 - College
 - Degree
 - Branch
 - Graduation year
 - Skills
-- GitHub URL
-- LinkedIn URL
-- Portfolio URL
-- Profile photo URL
+- GitHub
+- LinkedIn
+- Portfolio
+- Profile photo
 - Career objective
 
-The profile belongs to the authenticated user and is protected by the backend authorization layer.
+Profile data is associated with the authenticated user and protected by backend authorization.
 
-### 3. Resume Management
+### Resume Management
 
-The resume module provides:
+The resume module supports:
 
-- PDF upload
-- DOCX upload
-- Resume metadata persistence
-- Local file-system storage
+- PDF uploads
+- DOCX uploads
+- Resume metadata storage
+- Local file storage
 - Resume listing
 - Resume metadata retrieval
 - Resume download
 - Resume deletion
 - Resume replacement
-- Resume ownership enforcement
+- Ownership enforcement
+- File extension validation
 - Apache Tika content detection
 - File-size validation
-- Extension validation
 - Safe filename handling
 - UUID-based stored filenames
 - Path traversal protection
-- Cleanup of related analysis records when a resume is replaced or deleted
+- Related analysis cleanup
 
-The application enforces a 10 MB application-level resume limit.
+The application enforces a 10 MB application-level resume size limit.
 
-### 4. AI-Powered Role-Aware Resume Analysis
+### AI Resume Analysis
 
-Students can analyze their resume against a selected target role.
+Students can analyze a resume for a selected target role.
 
-The analysis considers the requested role and returns structured results including:
+The AI analysis provides:
 
-- Overall score from 0 to 100
+- Resume score from 0 to 100
 - Technical skills
 - Strengths
 - Weaknesses
@@ -104,101 +86,100 @@ The analysis considers the requested role and returns structured results includi
 - Recommendations
 - Summary
 
-The analysis is persisted against the resume and target job title. A resume can therefore have separate analysis results for different target roles.
+Analysis results are persisted against both the resume and target job role. This allows one resume to be evaluated for multiple roles while maintaining separate analysis results.
 
-The feature is role-aware rather than job-description matching. The target role determines the evaluation context used by the AI analysis workflow.
+The analysis is role-aware. It evaluates the resume in the context of a selected role rather than performing job-description matching.
 
-### 5. Resume Text Extraction
+### Resume Text Extraction
 
-Uploaded PDF and DOCX files are processed with Apache Tika.
+PDF and DOCX resumes are processed with Apache Tika.
 
-The backend:
-
-1. Validates the uploaded file.
-2. Detects the actual document type.
-3. Extracts readable text.
-4. Normalizes the extracted text.
-5. Passes the resume content and selected role into the AI analysis workflow.
-
-### 6. AI Analysis Workflow
-
-The AI analysis pipeline is organized into clear application layers:
-
-```
-Authenticated Student
-        |
-        v
-Resume + Target Job Role
-        |
-        v
-Resume Ownership Validation
-        |
-        v
-Resume File Validation
-        |
-        v
-Text Extraction
-        |
-        v
-Role-Aware AI Analysis
-        |
-        v
-Structured Analysis Result
-        |
-        v
-ResumeAnalysis Persistence
-        |
-        v
-API Response
-```
-
-The AI layer uses a provider abstraction so the application-level analysis workflow remains separated from provider-specific communication.
-
-The prompt-processing layer also treats resume content as untrusted input and instructs the AI system to use the resume as evidence rather than following instructions embedded inside the uploaded document.
+The backend validates the uploaded document, detects its content type, extracts the text, normalizes the extracted content, and sends the relevant resume information into the AI analysis workflow.
 
 ## Technology Stack
 
-### Backend
+| Layer | Technology |
+|---|---|
+| Frontend | React 19 |
+| Frontend Build Tool | Vite 8 |
+| Frontend HTTP Client | Axios |
+| Backend | Java 21 |
+| Backend Framework | Spring Boot 4.1.1 |
+| Security | Spring Security + JWT |
+| Persistence | Spring Data JPA + Hibernate |
+| Database | MySQL |
+| Document Processing | Apache Tika 3.2.3 |
+| Build Tool | Maven |
+| AI | Integrated AI provider |
+| UI Icons | Lucide React + React Icons |
 
-- Java 21
-- Spring Boot 4.1.1
-- Spring Security
-- Spring Data JPA
-- Hibernate
-- MySQL
-- JJWT 0.12.6
-- Apache Tika 3.2.3
-- Maven
-- Lombok
+## Architecture
 
-### Frontend
+SmartPlacement-AI follows a layered full-stack architecture.
 
-- React 19
-- Vite 8
-- JavaScript
-- JSX
-- Axios
-- Lucide React
-- React Icons
+```
+                    +----------------------+
+                    |    React Frontend    |
+                    +----------+-----------+
+                               |
+                         Axios / JWT
+                               |
+                               v
+                    +----------------------+
+                    |   Spring Boot API    |
+                    +----------+-----------+
+                               |
+              +----------------+----------------+
+              |                |                |
+              v                v                v
+       Authentication     Application       AI Analysis
+       & Authorization      Services           Layer
+              |                |                |
+              |                v                v
+              |          Repositories      AI Provider
+              |                |
+              +----------------+----------------+
+                               |
+                               v
+                         +-----------+
+                         |   MySQL   |
+                         +-----------+
+```
 
-### Database
+### Resume Analysis Flow
 
-- MySQL
-- JPA/Hibernate
-
-### AI
-
-- Production AI provider integration
-- Provider abstraction
-- Role-aware prompt construction
-- Structured analysis response handling
-- Persistent analysis results
+```
+Student
+  |
+  v
+Resume + Target Role
+  |
+  v
+Ownership Validation
+  |
+  v
+File Validation
+  |
+  v
+Text Extraction
+  |
+  v
+Role-Aware AI Analysis
+  |
+  v
+Structured Result
+  |
+  v
+Database Persistence
+  |
+  v
+API Response
+```
 
 ## Repository Structure
 
 ```
 SmartPlacement-AI/
-|
 ├── backend/
 │   ├── src/
 │   │   ├── main/
@@ -225,59 +206,44 @@ SmartPlacement-AI/
 └── README.md
 ```
 
-## Backend Architecture
+## Backend Structure
 
-The backend follows a layered Spring Boot architecture.
+The backend is organized around the following responsibilities:
 
-```
-REST Controllers
-       |
-       v
-Application Services
-       |
-       +----------------------+
-       |                      |
-       v                      v
-Repositories            Security / AI
-       |                      |
-       v                      v
-     MySQL             Supporting Services
-```
-
-Important backend areas include:
-
-- Controllers
-- Services
-- Repositories
-- Entities
-- DTOs
-- Security
+- REST controllers
+- Application services
+- Repository layer
+- JPA entities
+- Request and response DTOs
+- Authentication and authorization
+- JWT processing
 - AI analysis
-- File validation
-- Text extraction
-- Exception handling
-- Configuration
+- Resume validation
+- Resume text extraction
+- File storage
+- Global exception handling
+- Application configuration
 
-The authenticated user's identity is obtained from the security context. User-controlled IDs are not used as the primary authorization mechanism for profile and resume ownership.
+The authenticated user's identity is obtained from Spring Security. Profile and resume ownership are enforced on the server.
 
-## Frontend Architecture
+## Frontend Structure
 
-The React application communicates with the Spring Boot API through Axios.
+The React frontend provides the user-facing application experience.
 
-The frontend is responsible for:
+Major responsibilities include:
 
-- Authentication screens
+- Authentication
 - Student dashboard
 - Profile management
 - Resume management
-- Resume analysis interaction
-- Display of structured analysis results
-- API error handling
-- Authenticated API requests
+- Resume analysis
+- Analysis result presentation
+- API communication
+- Client-side application state
 
-The backend remains responsible for authorization, validation, file processing, AI analysis, and persistence.
+Axios is used for communication with the Spring Boot REST API.
 
-## API Overview
+## API
 
 ### Authentication
 
@@ -317,112 +283,130 @@ DELETE /api/resumes/{id}
 POST /api/ai/resume-analyze/{resumeId}?jobTitle={jobTitle}
 ```
 
-Detailed request and response documentation is maintained in `docs/api.md`.
+All protected endpoints require a valid JWT bearer token.
 
-## Database Model
+Detailed API documentation will be maintained in `docs/api.md`.
 
-The main domain entities are:
+## Database
+
+The primary domain entities are:
 
 - User
 - StudentProfile
 - Resume
 - ResumeAnalysis
 
-The core relationships are:
+Relationships:
 
 ```
 User
- |
- +---- 1 : 1 ---- StudentProfile
- |
- +---- 1 : N ---- Resume
-                     |
-                     +---- 1 : N ---- ResumeAnalysis
+├── StudentProfile       1 : 1
+└── Resume               1 : N
+      └── ResumeAnalysis 1 : N
 ```
 
-Resume analyses are uniquely identified by the combination of:
+Resume analyses are associated with both a resume and a target job title. This supports role-specific analysis for the same resume.
 
-- Resume
-- Target job title
-
-This allows the same resume to be analyzed for multiple target roles while preventing duplicate analysis records for the same resume and role.
-
-Detailed database documentation is maintained in `docs/database.md`.
+Detailed database documentation will be maintained in `docs/database.md`.
 
 ## Security
 
 Security is enforced at the backend boundary.
 
-Key controls include:
+The application includes:
 
 - BCrypt password hashing
 - Stateless JWT authentication
 - JWT signature validation
 - JWT expiration validation
 - Bearer token validation
-- Authentication-required responses
-- Access-denied responses
-- Resume ownership checks
-- Authenticated-user profile access
-- PDF and DOCX extension validation
+- Authentication and authorization controls
+- Resume ownership verification
+- Profile ownership verification
+- PDF and DOCX validation
 - Apache Tika content detection
-- 10 MB application-level resume limit
-- UUID-based stored filenames
-- Original filename sanitization
+- 10 MB resume size validation
+- UUID-based file storage
+- Filename sanitization
 - Path traversal protection
-- Safe global exception responses
+- Centralized exception handling
 - Restricted CORS configuration
 - TRACE request denial
 
-Secrets, passwords, JWT keys, and AI provider credentials must be supplied through environment-specific configuration and must not be committed to source control.
-
-Detailed security documentation is maintained in `docs/security.md`.
+Sensitive values such as database credentials, JWT secrets, and AI provider credentials must be supplied through environment-specific configuration and must never be committed to source control.
 
 ## Configuration
 
-The base application configuration activates the local Spring profile.
+The application uses the local Spring profile for development.
 
-Environment-specific configuration supplies values such as:
+Environment-specific configuration provides:
 
 - MySQL connection details
 - JWT secret
 - JWT expiration
 - Resume upload directory
-- Resume size limit
-- Multipart request limits
+- Resume size limits
+- Multipart limits
 - AI provider credentials
 - AI provider configuration
 
-Actual secrets must never be committed to the repository.
+Do not commit secrets or private credentials to the repository.
 
-## Running the Backend
+## Getting Started
 
-From the `backend/` directory:
+### Prerequisites
 
-### macOS / Linux
+Install:
+
+- Java 21
+- Maven Wrapper included with the backend
+- MySQL
+- Bun
+- Git
+
+### Backend
+
+Navigate to the backend directory:
+
+```bash
+cd backend
+```
+
+Run the application on macOS/Linux:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-### Windows
+On Windows:
 
 ```powershell
 .\\mvnw.cmd spring-boot:run
 ```
 
-The backend requires a configured MySQL database and the required environment-specific application properties.
+Configure the required MySQL, JWT, file-storage, and AI provider settings before starting the backend.
 
-## Running the Frontend
+### Frontend
 
-From the `frontend/` directory:
+Navigate to the frontend directory:
+
+```bash
+cd frontend
+```
+
+Install dependencies:
 
 ```bash
 bun install
+```
+
+Start the development server:
+
+```bash
 bun run dev
 ```
 
-For a production build:
+Build the frontend:
 
 ```bash
 bun run build
@@ -430,9 +414,10 @@ bun run build
 
 ## Testing
 
-Backend tests are executed with:
+Run the backend test suite:
 
 ```bash
+cd backend
 ./mvnw clean test
 ```
 
@@ -442,84 +427,66 @@ On Windows:
 .\\mvnw.cmd clean test
 ```
 
-The project test suite covers the major backend application areas including authentication, profile management, resume processing, validation, AI analysis, and security behavior.
-
-The frontend production build is verified with:
+Run the frontend production build:
 
 ```bash
+cd frontend
 bun run build
 ```
 
-Detailed testing information is maintained in `docs/testing.md`.
+The test suite covers core application behavior including authentication, profile management, resume processing, validation, AI analysis, and security.
 
 ## Documentation
 
-Detailed project documentation is organized under `docs/`:
+Detailed technical documentation is organized under `docs/`:
 
-- `docs/architecture.md` - application architecture and module responsibilities
-- `docs/setup.md` - local development and configuration setup
+- `docs/architecture.md` - system architecture and module responsibilities
+- `docs/setup.md` - development environment and configuration
 - `docs/api.md` - REST API reference
 - `docs/database.md` - database schema and relationships
 - `docs/security.md` - security architecture and controls
 - `docs/ai-analysis.md` - AI resume analysis workflow
 - `docs/testing.md` - testing strategy and verification
 
-## Project Scope
-
-The completed project scope covers:
-
-- Student authentication
-- Student profile management
-- Resume upload and management
-- Resume text extraction
-- Role-aware AI resume analysis
-- Persistent analysis history by resume and target role
-- Security hardening
-- Backend validation
-- Automated testing
-- React frontend integration
-- Technical documentation
-
-The AI analysis feature is intentionally role-aware. It evaluates a resume for a selected target role and does not require a separate job-description matching workflow.
-
-## End-to-End Flow
+## End-to-End Application Flow
 
 ```
 Student
-  |
-  v
+   |
+   v
 React Frontend
-  |
-  | JWT-authenticated REST API
-  v
+   |
+   | JWT-authenticated REST API
+   v
 Spring Boot Backend
-  |
-  +--> Authentication / Authorization
-  |
-  +--> Student Profile
-  |
-  +--> Resume Management
-  |       |
-  |       +--> File Validation
-  |       +--> Apache Tika
-  |       +--> File Storage
-  |
-  +--> AI Resume Analysis
-          |
-          +--> Text Extraction
-          +--> Role-Aware Prompt
-          +--> AI Provider
-          +--> Structured Result
-          +--> MySQL Persistence
-  |
-  v
+   |
+   +--> Authentication
+   |
+   +--> Student Profile
+   |
+   +--> Resume Management
+   |       |
+   |       +--> File Validation
+   |       +--> Text Extraction
+   |       +--> File Storage
+   |
+   +--> AI Resume Analysis
+           |
+           +--> Role-Aware Processing
+           +--> AI Provider
+           +--> Structured Analysis
+           +--> Persistence
+   |
+   v
 MySQL
 ```
 
+## Project Purpose
+
+SmartPlacement-AI brings authentication, student profile management, resume handling, and AI-assisted resume evaluation into a single placement-focused platform.
+
+The goal is to provide students with actionable, role-specific feedback on their resumes while maintaining secure backend processing and a clean separation between the frontend, business logic, persistence, and AI layers.
+
 ## Repository
 
-GitHub:
-
-https://github.com/sriman1957/smartplacement-ai
-
-SmartPlacement-AI is structured as a production-oriented student placement application with a clear separation between frontend presentation, backend business logic, persistence, security, document processing, and AI analysis.
+GitHub: https://github.com/sriman1957/smartplacement-ai
