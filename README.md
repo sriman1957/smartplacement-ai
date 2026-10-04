@@ -10,7 +10,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white" alt="Java 21">
-  <img src="https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot 4.1.1">
+  <img src="https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot 4.1.1">
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React 19">
   <img src="https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white" alt="MySQL">
   <img src="https://img.shields.io/badge/AI-Powered-7C3AED" alt="AI Powered">
