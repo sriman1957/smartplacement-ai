@@ -10,7 +10,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white" alt="Java 21">
-  <img src="https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot 4.1.1">
+  <img src="https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot 4.1.1">
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React 19">
   <img src="https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white" alt="MySQL">
   <img src="https://img.shields.io/badge/AI-Powered-7C3AED" alt="AI Powered">
@@ -31,20 +31,13 @@ It provides a secure workflow for students to:
 - Review structured, role-specific feedback
 - Identify strengths, weaknesses, missing skills, and improvement areas
 
-The platform is built with a clear separation between the web application, backend services, persistence, security, document processing, and AI analysis layers.
+The platform separates presentation, HTTP handling, business workflows, persistence, security, document processing, and AI analysis responsibilities.
 
 ## Why SmartPlacement-AI
 
-Traditional resume review is often generic. SmartPlacement-AI makes the analysis role-aware so that the same resume can be evaluated differently for different technical career paths.
+Traditional resume review is often generic. SmartPlacement-AI evaluates a resume in the context of a selected technical role so that the same resume can produce different role-specific assessments.
 
-For example, a student can evaluate the same resume for:
-
-- Java Full Stack Developer
-- Python Backend Developer
-- Frontend Developer
-- Other supported technical roles
-
-The result is a structured analysis rather than an unstructured block of AI-generated text.
+Supported role-specific criteria currently include Java Full Stack Developer, Python Backend Developer, and Frontend Developer. Other job titles use the general technical, practical, and professional evaluation model implemented by the prompt builder.
 
 ## Key Capabilities
 
@@ -62,7 +55,7 @@ The result is a structured analysis rather than an unstructured block of AI-gene
 
 ### Student Profile Management
 
-Students can maintain placement-oriented information including:
+Students can maintain:
 
 - Name
 - Phone number
@@ -77,7 +70,7 @@ Students can maintain placement-oriented information including:
 - Profile photo
 - Career objective
 
-Profile data is associated with the authenticated user and protected by backend authorization.
+Profile data is associated with the authenticated user.
 
 ### Resume Management
 
@@ -86,7 +79,7 @@ The resume module supports:
 - PDF uploads
 - DOCX uploads
 - Resume metadata persistence
-- Local file storage
+- Local filesystem storage
 - Resume listing
 - Resume metadata retrieval
 - Resume download
@@ -101,25 +94,25 @@ The resume module supports:
 - Path traversal protection
 - Related analysis cleanup
 
-The application-level resume size limit is configured through app.file.max-size. The documented project configuration uses a 10 MB limit.
+The application-level resume size limit is configured through app.file.max-size.
 
 ### AI-Powered Resume Analysis
 
 Students can analyze a resume for a selected target role.
 
-The analysis provides:
+The analysis returns:
 
 | Result | Description |
 |---|---|
 | Score | Overall resume score from 0 to 100 |
-| Technical Skills | Relevant technical skills identified from the resume |
-| Strengths | Strong areas supported by the resume |
-| Weaknesses | Areas that reduce alignment with the target role |
-| Missing Skills | Relevant skills not sufficiently represented |
-| Recommendations | Actionable improvement suggestions |
+| Technical Skills | Technical skills supported by resume evidence |
+| Strengths | Strengths supported by resume evidence |
+| Weaknesses | Role-relevant weaknesses or limited evidence |
+| Missing Skills | Relevant skills not demonstrated |
+| Recommendations | Practical improvement guidance |
 | Summary | Concise role-specific assessment |
 
-Analysis results are persisted against both the resume and target job role. The same resume can therefore be evaluated for multiple target roles with separate analysis records.
+Analysis results are persisted against both the resume and target job role. The same resume can therefore have independent analyses for multiple target roles.
 
 ### Resume Text Extraction
 
@@ -130,8 +123,8 @@ The backend:
 1. Validates the uploaded document.
 2. Detects the actual document content type.
 3. Extracts readable resume text.
-4. Normalizes the extracted content.
-5. Sends the relevant resume information into the AI analysis workflow.
+4. Normalizes extracted content.
+5. Passes the extracted text into the role-aware analysis workflow.
 
 ## Technology Stack
 
@@ -154,116 +147,29 @@ The backend:
 
 SmartPlacement-AI follows a layered full-stack architecture.
 
-```
-                         +----------------------+
-                         |    React Frontend    |
-                         +----------+-----------+
-                                    |
-                              Axios / JWT
-                                    |
-                                    v
-                         +----------------------+
-                         |   Spring Boot API    |
-                         +----------+-----------+
-                                    |
-              +---------------------+---------------------+
-              |                     |                     |
-              v                     v                     v
-       Authentication        Application Services    AI Analysis
-       & Authorization               |                  Layer
-              |                      |                     |
-              |                      v                     v
-              |                Repositories          AI Provider
-              |                      |
-              +----------------------+---------------------+
-                                    |
-                                    v
-                              +-----------+
-                              |   MySQL   |
-                              +-----------+
-```
-
-### Architectural Responsibilities
-
-**Frontend**
-
-- User interface
-- Authentication screens
-- Student dashboard
-- Profile management
-- Resume management
-- Resume analysis interaction
-- Analysis result presentation
-- API communication
-
-**Backend**
-
-- Authentication and authorization
-- Business logic
-- Profile management
-- Resume lifecycle management
-- File validation
-- Text extraction
-- AI analysis orchestration
-- Persistence
-- Error handling
-
-**Database**
-
-- User data
-- Student profiles
-- Resume metadata
-- AI analysis results
-
-**AI Layer**
-
-- Role-aware analysis
-- Prompt construction
-- Structured result processing
-- Provider integration
-
-## Application Workflow
-
-### Resume Analysis Flow
-
-```
+~~~text
 Student
    |
    v
 React Frontend
-   |
-   | JWT-authenticated request
+   | Axios / JSON / multipart / Bearer JWT
    v
-Spring Boot API
+Spring Boot REST API
    |
-   v
-Resume Ownership Validation
-   |
-   v
-Resume File Validation
-   |
-   v
-Text Extraction
-   |
-   v
-Role-Aware AI Analysis
-   |
-   v
-Structured Analysis Result
-   |
-   v
-ResumeAnalysis Persistence
-   |
-   v
-API Response
-   |
-   v
-React Analysis View
-```
+   +--> Spring Security / JWT
+   +--> Controllers
+   +--> Application Services
+   +--> Spring Data JPA --> MySQL
+   +--> Resume File Storage
+   +--> Apache Tika
+   +--> AIProvider --> Integrated AI provider
+~~~
 
-### End-to-End Platform Flow
+The backend is the authoritative security boundary. Client-side validation is not treated as authorization.
 
-```
+## Core Workflow
+
+~~~text
 Authentication
       |
       v
@@ -272,33 +178,36 @@ Student Profile
       v
 Resume Upload
       |
-      +----> File Validation
-      |
-      +----> Text Extraction
-      |
-      +----> Secure File Storage
+      +--> File validation
+      +--> Secure filesystem storage
       |
       v
-Target Role Selection
+Target Role
       |
       v
-AI Resume Analysis
-      |
-      +----> Score
-      +----> Technical Skills
-      +----> Strengths
-      +----> Weaknesses
-      +----> Missing Skills
-      +----> Recommendations
-      +----> Summary
+Resume Ownership Check
       |
       v
-Persistent Analysis Result
-```
+Text Extraction
+      |
+      v
+Role-Aware AI Analysis
+      |
+      +--> Score
+      +--> Technical Skills
+      +--> Strengths
+      +--> Weaknesses
+      +--> Missing Skills
+      +--> Recommendations
+      +--> Summary
+      |
+      v
+Validated Persistent Analysis
+~~~
 
 ## Security
 
-Security is enforced at the backend boundary rather than relying on client-side controls.
+Security is enforced at the backend boundary.
 
 ### Authentication
 
@@ -306,93 +215,62 @@ Security is enforced at the backend boundary rather than relying on client-side 
 - Stateless JWT authentication
 - JWT signature validation
 - JWT expiration validation
-- Bearer token validation
+- Bearer token processing
 
 ### Authorization
 
+- Protected application endpoints
 - Authenticated-user profile access
 - Resume ownership verification
-- Protected application endpoints
-- Centralized access-denied handling
+- Centralized 401 and 403 handling
+- Explicit TRACE denial
 
 ### File Security
 
 - PDF and DOCX validation
 - Apache Tika content detection
-- 10 MB application-level size validation
-- UUID-based file storage
-- Filename sanitization
-- Path traversal protection
-
-### Application Security
-
-- Centralized exception handling
-- Restricted CORS configuration
-- TRACE request denial
-- No exposure of sensitive backend details through API errors
+- Configured upload limits
+- UUID-based storage filenames
+- Safe original filename handling
+- Path containment protection
 
 ### AI Input Security
 
-Uploaded resume content is treated as untrusted input during AI processing. The analysis workflow is designed to use resume content as evidence rather than treating instructions embedded inside the uploaded document as authoritative.
-
-Sensitive values such as database credentials, JWT secrets, and AI provider credentials must be supplied through environment-specific configuration and must never be committed to source control.
+Uploaded resume content is treated as untrusted input. The prompt explicitly instructs the evaluator not to follow instructions embedded in the resume and not to invent candidate evidence. AI output is validated before persistence.
 
 ## Database Model
 
-The primary domain entities are:
-
-- User
-- StudentProfile
-- Resume
-- ResumeAnalysis
-
-Relationships:
-
-```
+~~~text
 User
 ├── StudentProfile       1 : 1
 └── Resume               1 : N
       └── ResumeAnalysis 1 : N
-```
+~~~
 
-Resume analyses are associated with both a resume and a target job title. This supports role-specific analysis for the same resume.
+A resume analysis is identified by the combination of the resume and target job title.
 
 ## Repository Structure
 
-```
+~~~text
 SmartPlacement-AI/
 ├── backend/
 │   ├── src/
 │   │   ├── main/
-│   │   │   ├── java/
-│   │   │   └── resources/
 │   │   └── test/
 │   └── pom.xml
-│
 ├── frontend/
 │   ├── src/
-│   ├── package.json
-│   └── vite.config.*
-│
+│   └── package.json
 ├── docs/
-│   ├── architecture.md
-│   ├── setup.md
-│   ├── api.md
-│   ├── database.md
-│   ├── security.md
-│   ├── ai-analysis.md
-│   └── testing.md
-│
+├── CONTRIBUTING.md
 ├── .gitignore
 ├── README.md
 └── README.snapshot.md
-```
+~~~
 
 ## Getting Started
 
 ### Prerequisites
-
-Install the following:
 
 - Java 21
 - MySQL
@@ -400,171 +278,103 @@ Install the following:
 - npm
 - Git
 
-### 1. Clone the Repository
+### Backend
 
-```bash
-git clone https://github.com/sriman1957/smartplacement-ai.git
-cd smartplacement-ai
-```
+From backend:
 
-### 2. Configure the Backend
-
-Navigate to the backend:
-
-```bash
-cd backend
-```
-
-Configure the required environment-specific values for:
-
-- MySQL connection
-- JWT secret
-- JWT expiration
-- Resume storage
-- Resume size limits
-- AI provider credentials
-- AI provider configuration
-
-### 3. Run the Application
-
-```powershell
+~~~powershell
 .\mvnw.cmd spring-boot:run
-```
+~~~
 
-### 4. Start the Frontend
+### Frontend
 
-Open a new terminal and navigate to:
+From frontend:
 
-```bash
-cd frontend
-```
-
-Install dependencies:
-
-```bash
+~~~bash
 npm install
-```
-
-Start the development server:
-
-```bash
 npm run dev
-```
+~~~
 
-Build the frontend:
+### Verification
 
-```bash
+Backend:
+
+~~~powershell
+.\mvnw.cmd clean test
+~~~
+
+Frontend:
+
+~~~bash
+npm run lint
 npm run build
-```
+~~~
 
-## Configuration
-
-The application activates the local Spring profile for development. The repository does not contain a committed application-local.properties file, so local datasource, JWT, file-storage, multipart, and AI configuration must be supplied through the local runtime configuration.
-
-Environment-specific configuration provides values such as:
-
-| Configuration Area | Purpose |
-|---|---|
-| MySQL | Database connection |
-| JWT secret | Token signing |
-| JWT expiration | Authentication lifetime |
-| Resume upload directory | File storage location |
-| Resume size limit | Upload validation |
-| Multipart limits | Request-level upload limits |
-| AI provider credentials | AI service authentication |
-| AI provider configuration | AI analysis behavior |
-
-Keep secrets outside version control. Use environment-specific configuration for credentials and private values.
+The complete setup and troubleshooting procedure is documented in [docs/setup.md](docs/setup.md).
 
 ## API Overview
 
 | Method | Endpoint | Purpose | Authentication |
 |---|---|---|---|
-| POST | `/api/auth/register` | Register a user | Public |
-| POST | `/api/auth/login` | Authenticate a user | Public |
-| GET | `/api/auth/username-availability` | Check username availability | Public |
-| GET | `/api/health` | Health check | Public |
-| GET | `/api/student/profile` | Get student profile | JWT |
-| POST | `/api/student/profile` | Create student profile | JWT |
-| PUT | `/api/student/profile` | Update student profile | JWT |
-| POST | `/api/resumes/upload` | Upload resume | JWT |
-| GET | `/api/resumes` | List resumes | JWT |
-| GET | `/api/resumes/{id}` | Get resume metadata | JWT |
-| GET | `/api/resumes/{id}/file` | Download resume | JWT |
-| DELETE | `/api/resumes/{id}` | Delete resume | JWT |
-| POST | `/api/ai/resume-analyze/{resumeId}` | Analyze resume for a target role | JWT |
+| POST | /api/auth/register | Register a user | Public |
+| POST | /api/auth/login | Authenticate a user | Public |
+| GET | /api/auth/username-availability | Check username availability | Public |
+| GET | /api/health | Health check | Public |
+| GET | /api/student/profile | Get student profile | JWT |
+| POST | /api/student/profile | Create student profile | JWT |
+| PUT | /api/student/profile | Update student profile | JWT |
+| POST | /api/resumes/upload | Upload resume | JWT |
+| GET | /api/resumes | List resumes | JWT |
+| GET | /api/resumes/{id} | Get resume metadata | JWT |
+| GET | /api/resumes/{id}/file | Download resume | JWT |
+| DELETE | /api/resumes/{id} | Delete resume | JWT |
+| POST | /api/ai/resume-analyze/{resumeId} | Analyze resume for target role | JWT |
 
-The AI analysis endpoint accepts the target role through the `jobTitle` query parameter.
-
-All protected endpoints require a valid JWT bearer token.
-
-## Testing
-
-Run the backend test suite from the `backend/` directory:
-
-```powershell
-.\mvnw.cmd clean test
-```
-
-Run the frontend production build:
-
-```bash
-cd frontend
-npm run build
-```
-
-The test suite covers core application behavior including:
-
-- Authentication
-- Profile management
-- Resume processing
-- File validation
-- AI analysis
-- Security behavior
+See [docs/api.md](docs/api.md) for the complete contract.
 
 ## Documentation
 
-Detailed technical documentation is organized under `docs/`:
+Start with the [documentation hub](docs/index.md).
 
-| Document | Description |
+| Document | Purpose |
 |---|---|
-| `architecture.md` | System architecture and module responsibilities |
-| `setup.md` | Development environment and configuration |
-| `api.md` | REST API reference |
-| `database.md` | Database schema and relationships |
-| `security.md` | Security architecture and controls |
-| `ai-analysis.md` | AI resume analysis workflow |
-| `testing.md` | Testing strategy and verification |
+| [Architecture](docs/architecture.md) | System structure, boundaries, runtime flows, and design decisions |
+| [Setup](docs/setup.md) | Development environment, configuration, startup, and troubleshooting |
+| [API Reference](docs/api.md) | HTTP contract, validation, responses, errors, and ownership |
+| [Database](docs/database.md) | Data model, constraints, lifecycle, and schema management |
+| [Security](docs/security.md) | Threat model, trust boundaries, controls, and residual risks |
+| [AI Analysis](docs/ai-analysis.md) | AI processing contract, validation, persistence, and security |
+| [Testing](docs/testing.md) | Test strategy, coverage mapping, regression scenarios, and release gates |
+| [Architecture Decisions](docs/decisions.md) | Durable architectural decisions and consequences |
+| [Contributing](CONTRIBUTING.md) | Engineering and documentation contribution standards |
 
 ## Engineering Principles
-
-SmartPlacement-AI is built around the following engineering principles:
 
 - **Backend-enforced security** - authorization is enforced by the API rather than trusted to the client.
 - **Separation of concerns** - presentation, business logic, persistence, security, document processing, and AI responsibilities are separated.
 - **Secure document handling** - uploaded resumes are validated and stored using controlled server-side paths and generated filenames.
 - **Role-aware intelligence** - resume analysis is evaluated in the context of a selected target role.
-- **Structured AI output** - analysis results are represented as defined application data rather than unstructured text.
-- **Provider abstraction** - AI integration is separated from the surrounding application workflow.
-- **Validated input** - request data and uploaded files are validated before business processing.
-- **Persistent analysis** - AI analysis results are stored and associated with the resume and target role.
+- **Structured AI output** - AI results are validated against an application-defined contract before persistence.
+- **Provider abstraction** - AI integration is separated from application orchestration.
+- **Evidence-based evaluation** - unsupported candidate skills and achievements are not supposed to receive AI credit.
+- **Explicit limitations** - operational gaps are documented rather than presented as completed capabilities.
 
 ## Project Scope
 
-SmartPlacement-AI covers the placement workflow for:
+SmartPlacement-AI covers:
 
 - Student authentication
 - Student profile management
 - Resume upload and management
 - Resume text extraction
 - Role-aware AI resume analysis
-- Persistent analysis history by resume and target role
-- Secure backend processing
-- Validation and error handling
+- Persistent analysis by resume and target role
+- Backend security and ownership enforcement
+- Validation and controlled error handling
 - React frontend integration
 - Automated backend testing
 
-The AI analysis feature is intentionally role-aware. It evaluates a resume for a selected target role and does not require a separate job-description matching workflow.
+The AI analysis feature is intentionally role-aware. It evaluates a resume for a selected target role and does not implement a separate job-description matching workflow.
 
 ## Author
 
