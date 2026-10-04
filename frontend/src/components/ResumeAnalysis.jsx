@@ -32,8 +32,13 @@ import { analyzeResume } from "../services/resumeService";
 import "./ResumeAnalysis.css";
 
 const JOB_ROLES = [
+    "",
     "Java Full Stack Developer",
     "Python Backend Developer",
+    "Golang Developer",
+    "Rust Developer",
+    "iOS Developer",
+    "Android Developer",
     "React Developer",
     "Frontend Developer",
     "Backend Developer",
@@ -92,9 +97,7 @@ function getSkillIcon(skill) {
 }
 
 function ResumeAnalysis({ resume = null }) {
-    const [jobTitle, setJobTitle] = useState(
-        "Java Full Stack Developer",
-    );
+    const [jobTitle, setJobTitle] = useState("");
     const [analysis, setAnalysis] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -103,7 +106,12 @@ function ResumeAnalysis({ resume = null }) {
         useState("overview");
 
     async function handleAnalyze() {
-        if (!resume?.id || !jobTitle.trim()) {
+        if (!resume?.id) {
+            return;
+        }
+
+        if (!jobTitle.trim()) {
+            setError("Please select a job title.");
             return;
         }
 
@@ -838,15 +846,16 @@ function ResumeAnalysis({ resume = null }) {
                     <div className="resume-analysis-trigger-action">
                         <select
                             value={jobTitle}
-                            onChange={(event) =>
-                                setJobTitle(
-                                    event.target.value,
-                                )
-                            }
+                            onChange={(event) => {
+                                setJobTitle(event.target.value);
+                                setError("");
+                            }}
                             disabled={loading}
                             aria-label="Target job role"
                         >
-                            {JOB_ROLES.map((role) => (
+                            <option value="">Select a job title</option>
+
+                            {JOB_ROLES.filter(Boolean).map((role) => (
                                 <option
                                     key={role}
                                     value={role}
@@ -861,8 +870,7 @@ function ResumeAnalysis({ resume = null }) {
                             onClick={handleAnalyze}
                             disabled={
                                 loading ||
-                                !resume?.id ||
-                                !jobTitle.trim()
+                                !resume?.id
                             }
                             className="resume-analysis-open-button"
                         >
