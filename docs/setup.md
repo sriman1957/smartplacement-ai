@@ -1,3 +1,27 @@
+# Development Setup
+
+> **Document type:** Developer guide  
+> **Audience:** Contributors and maintainers  
+> **Scope:** Local development, configuration, startup, and verification
+
+## Before You Begin
+
+This guide assumes a local development environment. Values such as credentials, secrets, filesystem paths, and provider configuration are environment-specific and must not be copied from documentation into source control.
+
+## Contents
+
+- Prerequisites
+- Repository layout
+- Backend configuration
+- Database
+- Resume storage
+- Backend startup
+- Frontend startup
+- Verification
+- First-run checklist
+
+---
+
 # SmartPlacement-AI Setup Guide
 
 ## 1. Prerequisites
