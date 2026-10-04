@@ -376,7 +376,7 @@ cd backend
 ## Run the Application
 
 ```powershell
-.\\mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
 Configure the required MySQL, JWT, file-storage, and AI provider settings before starting the backend.
