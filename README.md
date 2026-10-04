@@ -412,7 +412,7 @@ npm run build
 Run the backend test suite from the `backend/` directory:
 
 ```powershell
-.\\mvnw.cmd clean test
+.\mvnw.cmd clean test
 ```
 
 Run the frontend production build:
