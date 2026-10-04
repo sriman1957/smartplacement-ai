@@ -1,3 +1,30 @@
+# Security
+
+> **Document type:** Security architecture reference  
+> **Audience:** Developers, reviewers, maintainers, and deployment engineers  
+> **Scope:** Authentication, authorization, input validation, file security, AI input security, and error handling
+
+## Security Principle
+
+The backend is the authoritative security boundary. Client-side validation improves user experience but is never treated as authorization or trust enforcement.
+
+## Contents
+
+- Security model
+- Authentication
+- JWT processing
+- Endpoint protection
+- Authorization and ownership
+- Request validation
+- File upload security
+- AI input security
+- CORS
+- Error handling
+- Secret management
+- Production hardening
+
+---
+
 # SmartPlacement-AI Security Architecture
 
 ## 1. Security Boundary
