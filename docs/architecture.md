@@ -1,3 +1,28 @@
+# Architecture
+
+> **Document type:** Architecture reference  
+> **Audience:** Developers, reviewers, maintainers, and technical evaluators  
+> **Scope:** Application structure, boundaries, runtime flow, and design decisions
+
+## Document Conventions
+
+This document describes the architecture implemented in the repository. It intentionally distinguishes implemented behavior from operational recommendations. It does not prescribe an alternative architecture.
+
+## Contents
+
+- System context
+- Architectural boundaries
+- Backend responsibilities
+- Authentication architecture
+- Resume architecture
+- AI analysis architecture
+- Persistence relationships
+- Frontend architecture
+- Error boundary
+- Design principles
+
+---
+
 # SmartPlacement-AI Architecture
 
 ## 1. System Overview
