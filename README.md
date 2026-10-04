@@ -361,7 +361,8 @@ Install:
 - Java 21
 - Maven Wrapper included with the backend
 - MySQL
-- Bun
+- Node.js
+- npm
 - Git
 
 ### Backend
@@ -397,31 +398,24 @@ cd frontend
 Install dependencies:
 
 ```bash
-bun install
+npm install
 ```
 
 Start the development server:
 
 ```bash
-bun run dev
+npm run dev
 ```
 
 Build the frontend:
 
 ```bash
-bun run build
+npm run build
 ```
 
 ## Testing
 
-Run the backend test suite:
-
-```bash
-cd backend
-./mvnw clean test
-```
-
-On Windows:
+Run the backend test suite from the `backend/` directory:
 
 ```powershell
 .\\mvnw.cmd clean test
@@ -431,7 +425,7 @@ Run the frontend production build:
 
 ```bash
 cd frontend
-bun run build
+npm run build
 ```
 
 The test suite covers core application behavior including authentication, profile management, resume processing, validation, AI analysis, and security.
