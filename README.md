@@ -373,13 +373,7 @@ Navigate to the backend directory:
 cd backend
 ```
 
-Run the application on macOS/Linux:
-
-```bash
-./mvnw spring-boot:run
-```
-
-On Windows:
+## Run the Application
 
 ```powershell
 .\\mvnw.cmd spring-boot:run
