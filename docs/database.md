@@ -1,3 +1,26 @@
+# Database Design
+
+> **Document type:** Persistence reference  
+> **Audience:** Backend developers, database reviewers, and maintainers  
+> **Scope:** Entities, relationships, constraints, ownership, and lifecycle
+
+## Data Model Principle
+
+The database stores application state and resume metadata. Resume binary content is maintained in filesystem storage. The relational model therefore represents ownership, metadata, and persisted analysis results rather than embedding uploaded documents as database blobs.
+
+## Contents
+
+- Persistence model
+- Entity relationships
+- Entity definitions
+- Analysis identity
+- Ownership
+- Lifecycle cleanup
+- Timestamps
+- Schema management
+
+---
+
 # SmartPlacement-AI Database Design
 
 ## 1. Persistence Stack
